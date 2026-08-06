@@ -11,6 +11,7 @@ namespace TaskManagementTool.API.Controllers;
 [Authorize(Roles = "Admin")]
 public class UsersController : ControllerBase
 {
+    
     private readonly UserManager<ApplicationUser> _userManager;
 
     public UsersController(UserManager<ApplicationUser> userManager)
