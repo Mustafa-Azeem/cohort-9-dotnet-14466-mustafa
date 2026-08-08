@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getDashboardCounts } from "../services/taskService";
 import { useAuth } from "../context/AuthContext";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
 function Dashboard() {
   const [counts, setCounts] = useState({ pending: 0, inProgress: 0, completed: 0 });
@@ -24,9 +24,9 @@ function Dashboard() {
   };
 
   return (
-    <div className="page-wrapper">
-      <Navbar />
-      <div className="page-content">
+    <div className="app-layout">
+      <Sidebar />
+      <main className="main-content">
         <h1>Dashboard</h1>
         <p className="page-subtitle">
           {isAdmin ? "Overview of all tasks in the system" : `Welcome back, ${user?.fullName}`}
@@ -37,20 +37,23 @@ function Dashboard() {
         ) : (
           <div className="stats-grid">
             <div className="stat-card pending">
+              <div className="stat-icon">⏱</div>
               <h3>Pending</h3>
               <p className="stat-number">{counts.pending}</p>
             </div>
             <div className="stat-card in-progress">
+              <div className="stat-icon">▤</div>
               <h3>In Progress</h3>
               <p className="stat-number">{counts.inProgress}</p>
             </div>
             <div className="stat-card completed">
+              <div className="stat-icon">✓</div>
               <h3>Completed</h3>
               <p className="stat-number">{counts.completed}</p>
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
