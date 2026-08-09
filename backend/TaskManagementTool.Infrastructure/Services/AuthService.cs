@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -55,28 +54,21 @@ public class AuthService : IAuthService
             throw new ApiException(errors, 400);
         }
 
-        // note: bootstrapping the very first account as Admin so the system has
-        // at least one admin without a separate seed step. this is a deliberate
-        // simplification for the scope of this project - a real system would use
-        // an invite-only or manually-seeded admin flow instead
-        if (!await _roleManager.RoleExistsAsync("Admin"))
-            await _roleManager.CreateAsync(new IdentityRole("Admin"));
         if (!await _roleManager.RoleExistsAsync("User"))
             await _roleManager.CreateAsync(new IdentityRole("User"));
 
-        var totalUsers = await _userManager.Users.CountAsync();
-        var roleToAssign = totalUsers <= 1 ? "Admin" : "User";
-
-        var roleResult = await _userManager.AddToRoleAsync(newUser, roleToAssign);
+        // public registration always creates a regular User. Admin accounts are
+        // seeded at startup instead - nobody can grant themselves Admin this way
+        var roleResult = await _userManager.AddToRoleAsync(newUser, "User");
         if (!roleResult.Succeeded)
         {
             _logger.LogError("Failed to assign role to newly created user {UserId}", newUser.Id);
             throw new ApiException("Account created but role assignment failed, please contact support", 500);
         }
 
-        _logger.LogInformation("New user registered as {Role}", roleToAssign);
+        _logger.LogInformation("New user registered");
 
-        return await BuildAuthResponse(newUser, roleToAssign);
+        return await BuildAuthResponse(newUser, "User");
     }
 
     public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)

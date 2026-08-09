@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage } from "../utils/errorHelper";
 
 function Register() {
   const [fullName, setFullName] = useState("");
@@ -23,7 +24,7 @@ function Register() {
       login(data);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.error || "Registration failed");
+      setError(getErrorMessage(err, "Registration failed"));
     } finally {
       setLoading(false);
     }
@@ -64,6 +65,7 @@ function Register() {
           minLength={8}
           required
         />
+        <p className="field-hint">At least 8 characters, with uppercase, lowercase, and a number.</p>
 
         <button type="submit" disabled={loading}>
           {loading ? "Creating account..." : "Sign Up"}

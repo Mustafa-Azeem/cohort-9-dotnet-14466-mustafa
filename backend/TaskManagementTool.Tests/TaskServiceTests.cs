@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using TaskManagementTool.Application.Exceptions;
@@ -8,15 +9,29 @@ using Xunit;
 
 namespace TaskManagementTool.Tests;
 
-public class TaskServiceTests
+public class TaskServiceTests : IDisposable
 {
+    private readonly List<SqliteConnection> _connections = new();
+
     private AppDbContext GetDbContext()
     {
+        var connection = new SqliteConnection("Filename=:memory:");
+        connection.Open();
+        _connections.Add(connection);
+
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .UseSqlite(connection)
             .Options;
 
-        return new AppDbContext(options);
+        var db = new AppDbContext(options);
+        db.Database.EnsureCreated();
+        return db;
+    }
+
+    public void Dispose()
+    {
+        foreach (var connection in _connections)
+            connection.Dispose();
     }
 
     [Fact]
@@ -80,6 +95,8 @@ public class TaskServiceTests
     public async Task DeleteTaskAsync_RegularUser_CannotDeleteOthersTask()
     {
         var db = GetDbContext();
+        db.Users.Add(new ApplicationUser { Id = "user1", FullName = "User One" });
+        db.Users.Add(new ApplicationUser { Id = "user2", FullName = "User Two" });
         db.Tasks.Add(new TaskItem { Id = 1, Title = "Task A", AssignedUserId = "user1", CreatedByUserId = "user1" });
         await db.SaveChangesAsync();
 
@@ -93,6 +110,7 @@ public class TaskServiceTests
     public async Task DeleteTaskAsync_SoftDeletes_DoesNotRemoveFromDb()
     {
         var db = GetDbContext();
+        db.Users.Add(new ApplicationUser { Id = "user1", FullName = "User One" });
         db.Tasks.Add(new TaskItem { Id = 1, Title = "Task A", AssignedUserId = "user1", CreatedByUserId = "user1" });
         await db.SaveChangesAsync();
 
@@ -107,6 +125,7 @@ public class TaskServiceTests
     public async Task GetDashboardCountsAsync_ReturnsCorrectGrouping()
     {
         var db = GetDbContext();
+        db.Users.Add(new ApplicationUser { Id = "u1", FullName = "User One" });
         db.Tasks.Add(new TaskItem { Title = "A", AssignedUserId = "u1", Status = TaskManagementTool.Domain.Entities.JobStatus.Pending });
         db.Tasks.Add(new TaskItem { Title = "B", AssignedUserId = "u1", Status = TaskManagementTool.Domain.Entities.JobStatus.Completed });
         db.Tasks.Add(new TaskItem { Title = "C", AssignedUserId = "u1", Status = TaskManagementTool.Domain.Entities.JobStatus.Completed });

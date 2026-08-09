@@ -1,53 +1,44 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { getCurrentUser, logoutUser } from "../services/authService";
 
 const AuthContext = createContext(null);
 
-const getStoredUser = () => {
-  const stored = localStorage.getItem("user");
-  if (!stored) return null;
-
-  try {
-    return JSON.parse(stored);
-  } catch {
-    // corrupted data - clear it out and start fresh instead of crashing
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    return null;
-  }
-};
-
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(getStoredUser());
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (authData) => {
-    localStorage.setItem("token", authData.token);
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        userId: authData.userId,
-        fullName: authData.fullName,
-        email: authData.email,
-        role: authData.role,
-      })
-    );
-    setUser({
-      userId: authData.userId,
-      fullName: authData.fullName,
-      email: authData.email,
-      role: authData.role,
-    });
+  useEffect(() => {
+    rehydrate();
+  }, []);
+
+  const rehydrate = async () => {
+    try {
+      const data = await getCurrentUser();
+      setUser(data);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const login = (authData) => {
+    setUser(authData);
+  };
+
+  const logout = async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // cookie clear failed server-side, clear local state anyway
+    }
     setUser(null);
   };
 
   const isAdmin = user?.role === "Admin";
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAdmin }}>
+    <AuthContext.Provider value={{ user, login, logout, isAdmin, loading }}>
       {children}
     </AuthContext.Provider>
   );

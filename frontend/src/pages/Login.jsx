@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage } from "../utils/errorHelper";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -22,7 +23,7 @@ function Login() {
       login(data);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed, check your credentials");
+      setError(getErrorMessage(err, "Login failed, check your credentials"));
     } finally {
       setLoading(false);
     }

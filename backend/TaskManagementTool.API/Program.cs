@@ -28,8 +28,6 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// password policy - require a decent length + complexity rather than the
-// bare minimum, since this is a public registration endpoint
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequiredLength = 8;
@@ -65,6 +63,18 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtIssuer,
         ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+
+    // read the jwt from the httpOnly cookie instead of an Authorization header
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (context.Request.Cookies.TryGetValue("access_token", out var token) && !string.IsNullOrEmpty(token))
+                context.Token = token;
+
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -110,5 +120,40 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// seed a single admin account at startup so nobody can grant themselves
+// admin through public registration. only runs if no admin exists yet
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+    if (!await roleManager.RoleExistsAsync("Admin"))
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    if (!await roleManager.RoleExistsAsync("User"))
+        await roleManager.CreateAsync(new IdentityRole("User"));
+
+    var adminsExist = (await userManager.GetUsersInRoleAsync("Admin")).Any();
+    if (!adminsExist)
+    {
+        var adminEmail = config["AdminSeed:Email"];
+        var adminPassword = config["AdminSeed:Password"];
+
+        if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
+        {
+            var adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                FullName = "Admin"
+            };
+
+            var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+            if (createResult.Succeeded)
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+}
 
 app.Run();
