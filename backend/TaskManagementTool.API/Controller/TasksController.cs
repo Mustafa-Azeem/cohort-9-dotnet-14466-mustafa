@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TaskManagementTool.Application.DTOs.Tasks;
+using TaskManagementTool.Application.Exceptions;
 using TaskManagementTool.Application.Interfaces;
 
 namespace TaskManagementTool.API.Controllers;
@@ -18,7 +19,17 @@ public class TasksController : ControllerBase
         _taskService = taskService;
     }
 
-    private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    private string CurrentUserId
+    {
+        get
+        {
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(id))
+                throw new ApiException("Not authenticated", 401);
+            return id;
+        }
+    }
+
     private bool IsAdmin => User.IsInRole("Admin");
 
     [HttpGet]
@@ -41,7 +52,6 @@ public class TasksController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        
         if (!IsAdmin)
             dto.AssignedUserId = CurrentUserId;
 

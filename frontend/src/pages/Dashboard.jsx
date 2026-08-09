@@ -6,6 +6,7 @@ import Sidebar from "../components/Sidebar";
 function Dashboard() {
   const [counts, setCounts] = useState({ pending: 0, inProgress: 0, completed: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const { user, isAdmin } = useAuth();
 
   useEffect(() => {
@@ -13,11 +14,12 @@ function Dashboard() {
   }, []);
 
   const loadCounts = async () => {
+    setError("");
     try {
       const data = await getDashboardCounts();
       setCounts(data);
     } catch (err) {
-      console.error("Couldn't load dashboard counts", err);
+      setError("Couldn't load dashboard data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -34,6 +36,8 @@ function Dashboard() {
 
         {loading ? (
           <p>Loading...</p>
+        ) : error ? (
+          <div className="error-box">{error}</div>
         ) : (
           <div className="stats-grid">
             <div className="stat-card pending">

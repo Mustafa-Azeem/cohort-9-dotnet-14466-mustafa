@@ -1,13 +1,11 @@
 import axios from "axios";
 
-// backend url - change this if your port is different
-const BASE_URL = "http://localhost:5223/api";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5223/api";
 
 const api = axios.create({
   baseURL: BASE_URL,
 });
 
-// attach token automatically on every request if we have one
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -16,7 +14,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// if token expired or invalid, kick user back to login
 api.interceptors.response.use(
   (response) => response,
   (error) => {

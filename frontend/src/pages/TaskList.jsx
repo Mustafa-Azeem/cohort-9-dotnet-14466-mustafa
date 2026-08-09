@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 function TaskList() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -17,11 +18,12 @@ function TaskList() {
 
   const loadTasks = async () => {
     setLoading(true);
+    setError("");
     try {
       const data = await getTasks({ status: statusFilter, priority: priorityFilter, search });
       setTasks(data);
     } catch (err) {
-      console.error("Failed to load tasks", err);
+      setError("Couldn't load tasks. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -76,6 +78,8 @@ function TaskList() {
 
         {loading ? (
           <p>Loading tasks...</p>
+        ) : error ? (
+          <div className="error-box">{error}</div>
         ) : tasks.length === 0 ? (
           <p>No tasks found.</p>
         ) : (

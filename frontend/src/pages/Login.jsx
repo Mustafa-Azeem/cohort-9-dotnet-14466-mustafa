@@ -36,16 +36,18 @@ function Login() {
 
         {error && <div className="error-box">{error}</div>}
 
-        <label>Email</label>
+        <label htmlFor="login-email">Email</label>
         <input
+          id="login-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
 
-        <label>Password</label>
+        <label htmlFor="login-password">Password</label>
         <input
+          id="login-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

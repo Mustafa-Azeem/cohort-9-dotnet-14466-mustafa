@@ -23,7 +23,6 @@ public class TaskService : ITaskService
     {
         var query = _db.Tasks.Include(t => t.AssignedUser).AsQueryable();
 
-        
         if (!isAdmin)
             query = query.Where(t => t.AssignedUserId == currentUserId);
 
@@ -56,8 +55,8 @@ public class TaskService : ITaskService
 
     public async Task<TaskDto> CreateTaskAsync(TaskCreateUpdateDto dto, string currentUserId)
     {
-        var priority = Enum.TryParse<TaskPriority>(dto.Priority, true, out var p) ? p : TaskPriority.Medium;
-        var status = Enum.TryParse<JobStatus>(dto.Status, true, out var s) ? s : JobStatus.Pending;
+        Enum.TryParse<TaskPriority>(dto.Priority, true, out var priority);
+        Enum.TryParse<JobStatus>(dto.Status, true, out var status);
 
         var task = new TaskItem
         {
@@ -76,14 +75,13 @@ public class TaskService : ITaskService
 
         _logger.LogInformation("Task created: {TaskId} by {UserId}", task.Id, currentUserId);
 
-        
         var saved = await _db.Tasks.Include(t => t.AssignedUser).FirstAsync(t => t.Id == task.Id);
         return MapToDto(saved);
     }
 
     public async Task<TaskDto> UpdateTaskAsync(int id, TaskCreateUpdateDto dto, string currentUserId, bool isAdmin)
     {
-        var task = await _db.Tasks.Include(t => t.AssignedUser).FirstOrDefaultAsync(t => t.Id == id);
+        var task = await _db.Tasks.FirstOrDefaultAsync(t => t.Id == id);
         if (task == null)
             throw new ApiException("Task not found", 404);
 
@@ -102,7 +100,6 @@ public class TaskService : ITaskService
         if (Enum.TryParse<JobStatus>(dto.Status, true, out var status))
             task.Status = status;
 
-        //re-assign
         if (isAdmin && !string.IsNullOrEmpty(dto.AssignedUserId))
             task.AssignedUserId = dto.AssignedUserId;
 
@@ -110,7 +107,9 @@ public class TaskService : ITaskService
 
         _logger.LogInformation("Task updated: {TaskId} by {UserId}", task.Id, currentUserId);
 
-        return MapToDto(task);
+        // reload with the (possibly new) assigned user included so the response is accurate
+        var updated = await _db.Tasks.Include(t => t.AssignedUser).FirstAsync(t => t.Id == task.Id);
+        return MapToDto(updated);
     }
 
     public async Task DeleteTaskAsync(int id, string currentUserId, bool isAdmin)
@@ -119,11 +118,10 @@ public class TaskService : ITaskService
         if (task == null)
             throw new ApiException("Task not found", 404);
 
-        
         if (!isAdmin && task.AssignedUserId != currentUserId)
             throw new ApiException("You don't have access to this task", 403);
 
-        task.IsDeleted = true; // soft delete
+        task.IsDeleted = true;
         await _db.SaveChangesAsync();
 
         _logger.LogInformation("Task soft-deleted: {TaskId} by {UserId}", task.Id, currentUserId);
@@ -135,7 +133,6 @@ public class TaskService : ITaskService
         if (!isAdmin)
             query = query.Where(t => t.AssignedUserId == currentUserId);
 
-        
         var grouped = await query
             .GroupBy(t => t.Status)
             .Select(g => new { Status = g.Key, Count = g.Count() })

@@ -37,28 +37,31 @@ function Register() {
 
         {error && <div className="error-box">{error}</div>}
 
-        <label>Full Name</label>
+        <label htmlFor="register-fullname">Full Name</label>
         <input
+          id="register-fullname"
           type="text"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           required
         />
 
-        <label>Email</label>
+        <label htmlFor="register-email">Email</label>
         <input
+          id="register-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
 
-        <label>Password</label>
+        <label htmlFor="register-password">Password</label>
         <input
+          id="register-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          minLength={6}
+          minLength={8}
           required
         />
 

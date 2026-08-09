@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -36,7 +37,7 @@ public class AuthService : IAuthService
         var existingUser = await _userManager.FindByEmailAsync(request.Email);
         if (existingUser != null)
         {
-            _logger.LogWarning("Register attempt with already used email: {Email}", request.Email);
+            _logger.LogWarning("Register attempt with an email that's already in use");
             throw new ApiException("Email already in use", 409);
         }
 
@@ -54,17 +55,26 @@ public class AuthService : IAuthService
             throw new ApiException(errors, 400);
         }
 
-
+        // note: bootstrapping the very first account as Admin so the system has
+        // at least one admin without a separate seed step. this is a deliberate
+        // simplification for the scope of this project - a real system would use
+        // an invite-only or manually-seeded admin flow instead
         if (!await _roleManager.RoleExistsAsync("Admin"))
             await _roleManager.CreateAsync(new IdentityRole("Admin"));
         if (!await _roleManager.RoleExistsAsync("User"))
             await _roleManager.CreateAsync(new IdentityRole("User"));
 
-        var totalUsers = _userManager.Users.Count();
+        var totalUsers = await _userManager.Users.CountAsync();
         var roleToAssign = totalUsers <= 1 ? "Admin" : "User";
-        await _userManager.AddToRoleAsync(newUser, roleToAssign);
 
-        _logger.LogInformation("New user registered: {Email} as {Role}", newUser.Email, roleToAssign);
+        var roleResult = await _userManager.AddToRoleAsync(newUser, roleToAssign);
+        if (!roleResult.Succeeded)
+        {
+            _logger.LogError("Failed to assign role to newly created user {UserId}", newUser.Id);
+            throw new ApiException("Account created but role assignment failed, please contact support", 500);
+        }
+
+        _logger.LogInformation("New user registered as {Role}", roleToAssign);
 
         return await BuildAuthResponse(newUser, roleToAssign);
     }
@@ -74,28 +84,34 @@ public class AuthService : IAuthService
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
         {
-            _logger.LogWarning("Login failed - no user with email {Email}", request.Email);
+            _logger.LogWarning("Login failed - no matching account for the given email");
             throw new ApiException("Invalid email or password", 401);
         }
 
         var validPassword = await _userManager.CheckPasswordAsync(user, request.Password);
         if (!validPassword)
         {
-            _logger.LogWarning("Login failed - wrong password for {Email}", request.Email);
+            _logger.LogWarning("Login failed - wrong password for user {UserId}", user.Id);
             throw new ApiException("Invalid email or password", 401);
         }
 
         var roles = await _userManager.GetRolesAsync(user);
         var role = roles.FirstOrDefault() ?? "User";
 
-        _logger.LogInformation("User logged in: {Email}", user.Email);
+        _logger.LogInformation("User {UserId} logged in", user.Id);
 
         return await BuildAuthResponse(user, role);
     }
 
     private Task<AuthResponseDto> BuildAuthResponse(ApplicationUser user, string role)
     {
-        var jwtKey = _config["Jwt:Key"]!;
+        var jwtKey = _config["Jwt:Key"];
+        var issuer = _config["Jwt:Issuer"];
+        var audience = _config["Jwt:Audience"];
+
+        if (string.IsNullOrWhiteSpace(jwtKey) || string.IsNullOrWhiteSpace(issuer) || string.IsNullOrWhiteSpace(audience))
+            throw new ApiException("Server auth configuration is invalid", 500);
+
         var expiryMinutes = int.Parse(_config["Jwt:ExpiryMinutes"] ?? "60");
         var expiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes);
 
@@ -111,8 +127,8 @@ public class AuthService : IAuthService
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
+            issuer: issuer,
+            audience: audience,
             claims: claims,
             expires: expiresAt,
             signingCredentials: creds
