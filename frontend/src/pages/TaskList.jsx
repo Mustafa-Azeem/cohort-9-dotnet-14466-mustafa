@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getTasks, deleteTask } from "../services/taskService";
 import Navbar from "../components/Navbar";
@@ -11,21 +11,33 @@ function TaskList() {
   const [priorityFilter, setPriorityFilter] = useState("");
   const [search, setSearch] = useState("");
 
+  // guards against an older, slower request overwriting a newer one's result
+  const latestRequestId = useRef(0);
+
   useEffect(() => {
     loadTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, priorityFilter]);
 
   const loadTasks = async () => {
+    const requestId = ++latestRequestId.current;
     setLoading(true);
     setError("");
+
     try {
       const data = await getTasks({ status: statusFilter, priority: priorityFilter, search });
+
+      if (requestId !== latestRequestId.current) return; // a newer request already superseded this one
+
+      if (!Array.isArray(data)) {
+        throw new Error("Unexpected response shape");
+      }
       setTasks(data);
     } catch (err) {
+      if (requestId !== latestRequestId.current) return;
       setError("Couldn't load tasks. Please try again.");
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestId.current) setLoading(false);
     }
   };
 
@@ -79,7 +91,7 @@ function TaskList() {
         {loading ? (
           <p>Loading tasks...</p>
         ) : error ? (
-          <div className="error-box">{error}</div>
+          <div className="error-box" role="alert">{error}</div>
         ) : tasks.length === 0 ? (
           <p>No tasks found.</p>
         ) : (

@@ -3,6 +3,13 @@ import { getDashboardCounts } from "../services/taskService";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 
+const isValidCounts = (data) =>
+  data &&
+  typeof data === "object" &&
+  typeof data.pending === "number" &&
+  typeof data.inProgress === "number" &&
+  typeof data.completed === "number";
+
 function Dashboard() {
   const [counts, setCounts] = useState({ pending: 0, inProgress: 0, completed: 0 });
   const [loading, setLoading] = useState(true);
@@ -17,6 +24,9 @@ function Dashboard() {
     setError("");
     try {
       const data = await getDashboardCounts();
+      if (!isValidCounts(data)) {
+        throw new Error("Unexpected response shape");
+      }
       setCounts(data);
     } catch (err) {
       setError("Couldn't load dashboard data. Please try again.");
@@ -37,7 +47,7 @@ function Dashboard() {
         {loading ? (
           <p>Loading...</p>
         ) : error ? (
-          <div className="error-box">{error}</div>
+          <div className="error-box" role="alert">{error}</div>
         ) : (
           <div className="stats-grid">
             <div className="stat-card pending">

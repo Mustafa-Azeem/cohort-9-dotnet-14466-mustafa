@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -57,13 +58,14 @@ public class AuthService : IAuthService
         if (!await _roleManager.RoleExistsAsync("User"))
             await _roleManager.CreateAsync(new IdentityRole("User"));
 
-        // public registration always creates a regular User. Admin accounts are
-        // seeded at startup instead - nobody can grant themselves Admin this way
         var roleResult = await _userManager.AddToRoleAsync(newUser, "User");
         if (!roleResult.Succeeded)
         {
-            _logger.LogError("Failed to assign role to newly created user {UserId}", newUser.Id);
-            throw new ApiException("Account created but role assignment failed, please contact support", 500);
+            // don't leave a half-created account behind - a retry would otherwise
+            // hit "email already in use" even though registration never really succeeded
+            await _userManager.DeleteAsync(newUser);
+            _logger.LogError("Failed to assign role to new user, rolled back account creation");
+            throw new ApiException("Registration failed, please try again", 500);
         }
 
         _logger.LogInformation("New user registered");

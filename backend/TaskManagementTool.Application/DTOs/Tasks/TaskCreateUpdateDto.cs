@@ -22,10 +22,10 @@ public class TaskCreateUpdateDto : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (!Enum.TryParse<TaskPriority>(Priority, true, out _) || !Enum.IsDefined(typeof(TaskPriority), Enum.Parse<TaskPriority>(Priority, true)))
+        if (!Enum.TryParse<TaskPriority>(Priority, true, out var priority) || !Enum.IsDefined(priority))
             yield return new ValidationResult($"Priority must be one of: {string.Join(", ", Enum.GetNames(typeof(TaskPriority)))}", new[] { nameof(Priority) });
 
-        if (!Enum.TryParse<JobStatus>(Status, true, out _) || !Enum.IsDefined(typeof(JobStatus), Enum.Parse<JobStatus>(Status, true)))
+        if (!Enum.TryParse<JobStatus>(Status, true, out var status) || !Enum.IsDefined(status))
             yield return new ValidationResult($"Status must be one of: {string.Join(", ", Enum.GetNames(typeof(JobStatus)))}", new[] { nameof(Status) });
     }
 }

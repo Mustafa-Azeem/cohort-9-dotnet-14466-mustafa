@@ -44,7 +44,8 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("access_token");
+        // path must match what SetAuthCookie used, or the browser won't overwrite it
+        Response.Cookies.Delete("access_token", new CookieOptions { Path = "/" });
         return NoContent();
     }
 
@@ -68,7 +69,6 @@ public class AuthController : ControllerBase
 
     private void SetAuthCookie(string token, DateTime expiresAt)
     {
-        // secure requires https - only enforce it outside local dev so testing on http still works
         Response.Cookies.Append("access_token", token, new CookieOptions
         {
             HttpOnly = true,

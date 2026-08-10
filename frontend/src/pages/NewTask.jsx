@@ -24,6 +24,10 @@ function NewTask() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // in edit mode we must not let the user submit stale/default form values
+  // before the real task data has finished loading
+  const [existingLoaded, setExistingLoaded] = useState(!isEditMode);
+
   useEffect(() => {
     if (isAdmin) {
       loadUsers();
@@ -32,7 +36,7 @@ function NewTask() {
       loadExisting();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, isAdmin]);
 
   const loadUsers = async () => {
     try {
@@ -47,14 +51,15 @@ function NewTask() {
     try {
       const task = await getTaskById(id);
       setForm({
-        title: task.title,
+        title: task.title ?? "",
         description: task.description || "",
         dueDate: task.dueDate ? task.dueDate.split("T")[0] : "",
         priority: task.priority,
         status: task.status,
         category: task.category || "",
-        assignedUserId: task.assignedUserId || "",
+        assignedUserId: task.assignedUserId ?? "",
       });
+      setExistingLoaded(true);
     } catch (err) {
       setError("Couldn't load task details");
     }
@@ -90,7 +95,7 @@ function NewTask() {
         <h1>{isEditMode ? "Edit Task" : "New Task"}</h1>
 
         <form className="task-form" onSubmit={handleSubmit}>
-          {error && <div className="error-box">{error}</div>}
+          {error && <div className="error-box" role="alert">{error}</div>}
 
           <label htmlFor="task-title">Title</label>
           <input id="task-title" name="title" value={form.title} onChange={handleChange} required />
@@ -133,8 +138,8 @@ function NewTask() {
             </>
           )}
 
-          <button type="submit" disabled={loading}>
-            {loading ? "Saving..." : isEditMode ? "Update Task" : "Create Task"}
+          <button type="submit" disabled={loading || !existingLoaded}>
+            {loading ? "Saving..." : !existingLoaded ? "Loading task..." : isEditMode ? "Update Task" : "Create Task"}
           </button>
         </form>
       </div>
