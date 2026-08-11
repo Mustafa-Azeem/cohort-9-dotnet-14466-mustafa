@@ -1,0 +1,597 @@
+author:	coderabbitai
+association:	none
+edited:	true
+status:	none
+--
+<!-- This is an auto-generated comment: summarize by coderabbit.ai -->
+<!-- review_stack_entry_start -->
+
+[![Review Change Stack](https://storage.googleapis.com/coderabbit_public_assets/review-stack-in-coderabbit-ui.svg)](https://app.coderabbit.ai/change-stack/10pshine-cohort-9/cohort-9-dotnet-14466-mustafa/pull/1?utm_source=github_walkthrough&utm_medium=github&utm_campaign=change_stack)
+
+<!-- review_stack_entry_end -->
+<!-- walkthrough_start -->
+
+<details>
+<summary>📝 Walkthrough</summary>
+
+## Walkthrough
+
+Added a full-stack task management application. The backend provides JWT authentication, role-based task APIs, SQL Server persistence, soft deletion, dashboard counts, and tests. The React frontend provides authentication, protected routing, task CRUD pages, dashboards, profiles, and styling.
+
+### Changes
+
+**Task Management Application**
+
+|Layer / File(s)|Summary|
+|---|---|
+|**Domain contracts and persistence** <br> `backend/TaskManagementTool.Domain/*`, `backend/TaskManagementTool.Application/*`, `backend/TaskManagementTool.Infrastructure/Data/*`, `backend/TaskManagementTool.Infrastructure/Migrations/*`, `README.md`|Added domain entities, DTOs, service contracts, EF Core configuration, migrations, project structure, and documentation.|
+|**Backend authentication and runtime** <br> `backend/TaskManagementTool.API/*`, `backend/TaskManagementTool.Infrastructure/Services/AuthService.cs`, `backend/TaskManagementTool.Tests/AuthServiceTests.cs`|Added registration and login endpoints, JWT generation, Identity configuration, exception handling, rate limiting, CORS, logging, and authentication tests.|
+|**Backend task workflows** <br> `backend/TaskManagementTool.API/Controller/TasksController.cs`, `backend/TaskManagementTool.API/Controller/UsersController.cs`, `backend/TaskManagementTool.Infrastructure/TaskService.cs`, `backend/TaskManagementTool.Tests/TaskServiceTests.cs`|Added authorized task CRUD, filtering, assignment rules, soft deletion, dashboard aggregation, user listing, and task service tests.|
+|**Frontend application shell and authentication** <br> `frontend/src/App.jsx`, `frontend/src/context/*`, `frontend/src/components/*`, `frontend/src/pages/Login.jsx`, `frontend/src/pages/Register.jsx`, `frontend/src/pages/Profile.jsx`, `frontend/src/services/api.js`, `frontend/src/services/authService.js`, `frontend/package.json`, `frontend/vite.config.js`|Added React routing, persisted authentication state, protected routes, navigation, login and registration flows, profile display, API authorization, and frontend tooling.|
+|**Frontend task and dashboard workflows** <br> `frontend/src/pages/Dashboard.jsx`, `frontend/src/pages/TaskList.jsx`, `frontend/src/pages/TaskDetail.jsx`, `frontend/src/pages/NewTask.jsx`, `frontend/src/services/taskService.js`, `frontend/src/App.css`|Added dashboard counts, task filtering, task details, task creation and editing, deletion, loading and error states, API helpers, and task interface styling.|
+
+**Estimated code review effort:** 5 (Critical) | ~120 minutes
+
+### Sequence Diagram(s)
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant ReactApp
+  participant API
+  participant Database
+
+  User->>ReactApp: Submit credentials or task action
+  ReactApp->>API: Send HTTP request with optional JWT
+  API->>Database: Validate identity or read/write task data
+  Database-->>API: Return result
+  API-->>ReactApp: Return DTO or error response
+  ReactApp-->>User: Render authentication, dashboard, or task state
+```
+
+</details>
+
+<!-- walkthrough_end -->
+<!-- pre_merge_checks_walkthrough_start -->
+
+<details>
+<summary>🚥 Pre-merge checks | ✅ 4 | ❌ 1</summary>
+
+### ❌ Failed checks (1 warning)
+
+|     Check name     | Status     | Explanation                                                                          | Resolution                                                                         |
+| :----------------: | :--------- | :----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| Docstring Coverage | ⚠️ Warning | Docstring coverage is 6.00% which is insufficient. The required threshold is 80.00%. | Write docstrings for the functions missing them to satisfy the coverage threshold. |
+
+<details>
+<summary>✅ Passed checks (4 passed)</summary>
+
+|         Check name         | Status   | Explanation                                                                                                                  |
+| :------------------------: | :------- | :--------------------------------------------------------------------------------------------------------------------------- |
+|      Description Check     | ✅ Passed | Check skipped - CodeRabbit’s high-level summary is enabled.                                                                  |
+|         Title check        | ✅ Passed | The title clearly describes the dashboard redesign and sidebar navigation changes identified in the pull request objectives. |
+|     Linked Issues check    | ✅ Passed | Check skipped because no linked issues were found for this pull request.                                                     |
+| Out of Scope Changes check | ✅ Passed | Check skipped because no linked issues were found for this pull request.                                                     |
+
+</details>
+
+</details>
+
+<!-- pre_merge_checks_walkthrough_end -->
+<!-- finishing_touch_checkbox_start -->
+
+<details>
+<summary>✨ Finishing Touches</summary>
+
+<details>
+<summary>🧪 Generate unit tests (beta)</summary>
+
+- [ ] <!-- {"checkboxId": "f47ac10b-58cc-4372-a567-0e02b2c3d479", "radioGroupId": "utg-output-choice-group-unknown_comment_id"} -->   Create PR with unit tests
+
+</details>
+
+</details>
+
+<!-- finishing_touch_checkbox_end -->
+<!-- tips_start -->
+
+---
+
+Thanks for using [CodeRabbit](https://coderabbit.ai?utm_source=oss&utm_medium=github&utm_campaign=10pshine-cohort-9/cohort-9-dotnet-14466-mustafa&utm_content=1)! It's free for OSS, and your support helps us grow. If you like it, consider giving us a shout-out.
+
+<details>
+<summary>❤️ Share</summary>
+
+- [X](https://twitter.com/intent/tweet?text=I%20just%20used%20%40coderabbitai%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20the%20proprietary%20code.%20Check%20it%20out%3A&url=https%3A//coderabbit.ai)
+- [Mastodon](https://mastodon.social/share?text=I%20just%20used%20%40coderabbitai%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20the%20proprietary%20code.%20Check%20it%20out%3A%20https%3A%2F%2Fcoderabbit.ai)
+- [Reddit](https://www.reddit.com/submit?title=Great%20tool%20for%20code%20review%20-%20CodeRabbit&text=I%20just%20used%20CodeRabbit%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20proprietary%20code.%20Check%20it%20out%3A%20https%3A//coderabbit.ai)
+- [LinkedIn](https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fcoderabbit.ai&mini=true&title=Great%20tool%20for%20code%20review%20-%20CodeRabbit&summary=I%20just%20used%20CodeRabbit%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20proprietary%20code)
+
+</details>
+
+
+<sub>Comment `@coderabbitai help` to get the list of available commands.</sub>
+
+<!-- tips_end -->
+--
+author:	Mustafa-Azeem
+association:	none
+edited:	false
+status:	none
+--
+@Noumna10P @mhabib10Pearls please review this PR when you get a chance
+--
+author:	coderabbitai
+association:	none
+edited:	false
+status:	commented
+--
+**Actionable comments posted: 20**
+
+> [!NOTE]
+> Due to the large number of review comments, Critical, Major severity comments were prioritized as inline comments.
+
+<details>
+<summary>🟡 Minor comments (4)</summary><blockquote>
+
+<details>
+<summary>frontend/src/pages/Dashboard.jsx-15-23 (1)</summary><blockquote>
+
+`15-23`: _🎯 Functional Correctness_ | _🟡 Minor_ | _⚡ Quick win_
+
+**Render an API failure state instead of empty data.**
+
+Both pages clear `loading` after a failed request but do not store an error. The dashboard then displays zero counts. The task list then displays “No tasks found.” These states are incorrect when the API request failed.
+
+- `frontend/src/pages/Dashboard.jsx#L15-L23`: store the request error and render an error state instead of zero task counts.
+- `frontend/src/pages/TaskList.jsx#L18-L27`: store the request error and render an error state instead of the empty-list message.
+
+<details>
+<summary>🤖 Prompt for AI Agents</summary>
+
+```
+Verify each finding against current code. Fix only still-valid issues, skip the
+rest with a brief reason, keep changes minimal, and validate.
+
+In `@frontend/src/pages/Dashboard.jsx` around lines 15 - 23, Update the request
+flows in frontend/src/pages/Dashboard.jsx (lines 15-23) and
+frontend/src/pages/TaskList.jsx (lines 18-27) to store errors from
+getDashboardCounts and the task-list request, respectively. Render an explicit
+error state when a request fails, instead of showing zero dashboard counts or
+the “No tasks found” empty-list message; preserve the existing successful and
+loading states.
+```
+
+</details>
+
+<!-- cr-comment:v1:b3ec9a53c7043b2274ddf84f -->
+
+</blockquote></details>
+<details>
+<summary>backend/TaskManagementTool.API/TaskManagementTool.API.http-3-4 (1)</summary><blockquote>
+
+`3-4`: _📐 Maintainability & Code Quality_ | _🟡 Minor_ | _⚡ Quick win_
+
+**Update the sample HTTP request to target a live endpoint.**
+
+`TaskManagementTool.API.http` calls `/weatherforecast/`, but `Program.cs` only maps controllers and no controller in the project targets that route. Point the request at an existing endpoint, such as `/api/auth/register`, `/api/auth/login`, `/api/users`, or `/api/tasks`.
+
+<details>
+<summary>🤖 Prompt for AI Agents</summary>
+
+```
+Verify each finding against current code. Fix only still-valid issues, skip the
+rest with a brief reason, keep changes minimal, and validate.
+
+In `@backend/TaskManagementTool.API/TaskManagementTool.API.http` around lines 3 -
+4, Update the sample GET request in TaskManagementTool.API.http to target an
+endpoint actually mapped by the application, replacing /weatherforecast/ with an
+existing route such as /api/users or /api/tasks while preserving the JSON Accept
+header.
+```
+
+</details>
+
+<!-- cr-comment:v1:01a59c1e5211c206cb1a3fc9 -->
+
+</blockquote></details>
+<details>
+<summary>frontend/src/context/AuthContext.jsx-6-7 (1)</summary><blockquote>
+
+`6-7`: _🩺 Stability & Availability_ | _🟡 Minor_ | _⚡ Quick win_
+
+**Recover from malformed persisted user data.**
+
+`JSON.parse` throws if `localStorage.user` is malformed. The `AuthProvider` then fails to render. Parse in a `try` block and, on failure, clear `user` and `token` and start unauthenticated.
+
+<details>
+<summary>🤖 Prompt for AI Agents</summary>
+
+```
+Verify each finding against current code. Fix only still-valid issues, skip the
+rest with a brief reason, keep changes minimal, and validate.
+
+In `@frontend/src/context/AuthContext.jsx` around lines 6 - 7, Update
+AuthProvider’s persisted-user initialization to parse localStorage.user inside a
+try block; when parsing fails, remove both user and token from localStorage and
+initialize state as unauthenticated with a null user.
+```
+
+</details>
+
+<!-- cr-comment:v1:0477ac53223a29d0169f51a2 -->
+
+</blockquote></details>
+<details>
+<summary>frontend/index.html-7-7 (1)</summary><blockquote>
+
+`7-7`: _🎯 Functional Correctness_ | _🟡 Minor_ | _⚡ Quick win_
+
+**Use an application-specific document title.**
+
+`frontend` does not identify the task management application in browser tabs or assistive technology.
+
+<details>
+<summary>Proposed fix</summary>
+
+```diff
+-    <title>frontend</title>
++    <title>Task Management</title>
+```
+</details>
+
+<details>
+<summary>🤖 Prompt for AI Agents</summary>
+
+```
+Verify each finding against current code. Fix only still-valid issues, skip the
+rest with a brief reason, keep changes minimal, and validate.
+
+In `@frontend/index.html` at line 7, Update the document title in the HTML head
+from the generic “frontend” value to an application-specific title that
+identifies the task management application, preserving the existing title
+element.
+```
+
+</details>
+
+<!-- cr-comment:v1:e72f81afbe02fbca5f30b35e -->
+
+</blockquote></details>
+
+</blockquote></details>
+
+<details>
+<summary>🧹 Nitpick comments (1)</summary><blockquote>
+
+<details>
+<summary>frontend/README.md (1)</summary><blockquote>
+
+`1-16`: _📐 Maintainability & Code Quality_ | _🔵 Trivial_ | _⚡ Quick win_
+
+**Replace the Vite template README with application documentation.**
+
+The current text does not describe the task management frontend. Document installation, development commands, required API URL configuration, and the backend startup dependency.
+
+<details>
+<summary>🤖 Prompt for AI Agents</summary>
+
+```
+Verify each finding against current code. Fix only still-valid issues, skip the
+rest with a brief reason, keep changes minimal, and validate.
+
+In `@frontend/README.md` around lines 1 - 16, Replace the template content in the
+README with documentation for the task management frontend, including
+installation steps, development commands, the required API URL configuration,
+and the backend startup dependency. Remove the generic Vite and React template
+guidance while preserving accurate commands and configuration details for this
+application.
+```
+
+</details>
+
+<!-- cr-comment:v1:ee1f28ec0a85f50c02ace31f -->
+
+</blockquote></details>
+
+</blockquote></details>
+
+<details>
+<summary>🤖 Prompt for all review comments with AI agents</summary>
+
+```
+Verify each finding against current code. Fix only still-valid issues, skip the
+rest with a brief reason, keep changes minimal, and validate.
+
+Inline comments:
+In `@backend/TaskManagementTool.API/appsettings.json`:
+- Line 3: Update the DefaultConnection setting to remove
+TrustServerCertificate=True, preserving local development connection options
+while requiring SQL Server certificate validation for deployed databases.
+- Line 12: Remove the hardcoded JWT signing value from the appsettings
+configuration, including the "Key" entry, and load it through the existing
+deployment secret/configuration mechanism instead. Rotate the exposed key before
+release and ensure token signing still receives the injected secret at runtime.
+- Around line 20-21: Update the IpRateLimiting configuration associated with
+RealIpHeader so X-Real-IP is used only when requests come through explicitly
+trusted proxies, adding the application’s forwarding/proxy trust controls as
+needed. If trusted-proxy configuration is unavailable, remove or disable
+RealIpHeader lookups so clients cannot bypass per-IP limits by supplying
+arbitrary headers.
+
+In `@backend/TaskManagementTool.API/Controller/TasksController.cs`:
+- Line 21: Update the CurrentUserId property in TasksController to validate that
+ClaimTypes.NameIdentifier exists and is non-empty, returning an authentication
+error before any task service operation when it is missing. Remove reliance on
+the null-forgiving operator and preserve the existing authenticated-user flow
+when the claim is present.
+
+In `@backend/TaskManagementTool.API/Program.cs`:
+- Around line 41-58: Validate Jwt:Key, Jwt:Issuer, and Jwt:Audience immediately
+before configuring AddJwtBearer, rejecting null, empty, or whitespace values
+with clear startup errors. Store the validated values and use them for
+SymmetricSecurityKey, ValidIssuer, and ValidAudience instead of directly
+dereferencing configuration entries.
+- Around line 26-27: Update the DbContext registration around
+AddDbContext<AppDbContext> to capture the DefaultConnection value before calling
+UseSqlServer. Validate that it is present and non-empty, throw a clear
+configuration error when missing, and pass the validated value to UseSqlServer.
+- Around line 30-35: Strengthen the Identity password policy configured in
+AddIdentity<ApplicationUser, IdentityRole> and align AuthController.Register’s
+registration validation DTO with it: require a longer minimum password and
+enforce character complexity instead of disabling uppercase and non-alphanumeric
+requirements. Add breached-password screening or an equivalent registration
+control, ensuring all public registration paths apply the same policy.
+
+In `@backend/TaskManagementTool.Application/DTOs/Tasks/TaskCreateUpdateDto.cs`:
+- Around line 13-16: Update TaskCreateUpdateDto and the CreateTaskAsync/update
+validation flow to accept only defined TaskPriority and JobStatus enum values,
+rejecting empty, numeric, and unsupported strings with HTTP 400 instead of
+falling back to defaults or persisting unchecked parse results. Ensure both
+create and update paths validate Enum.IsDefined before assigning parsed values.
+
+In `@backend/TaskManagementTool.Infrastructure/Data/AppDbContext.cs`:
+- Line 27: Synchronize EF Core migration metadata with the HasQueryFilter
+configured in AppDbContext for TaskItem.IsDeleted. If InitialCreate is already
+deployed, add a follow-up migration; otherwise update or replace InitialCreate,
+ensuring both InitialCreate.Designer and AppDbContextModelSnapshot record the
+query filter.
+
+In `@backend/TaskManagementTool.Infrastructure/Services/AuthService.cs`:
+- Around line 63-65: Remove the user-count-based role selection in AuthService
+and assign User to every public registration; bootstrap administrators only
+through controlled setup. In AuthController, keep the registration endpoint
+restricted to standard-user creation, or require authorization by an existing
+administrator before allowing privileged account creation. Apply the changes at
+backend/TaskManagementTool.Infrastructure/Services/AuthService.cs lines 63-65
+and backend/TaskManagementTool.API/Controller/AuthController.cs lines 18-26.
+- Line 39: Update AuthService.cs at lines 39-39, 77-77, and 84-84 to remove
+request.Email from duplicate-registration, unknown-user login, and
+invalid-password logs, recording only the event type and a non-sensitive
+correlation identifier. At line 91-91, replace user.Email with the established
+non-sensitive audit identifier; preserve the existing authentication behavior
+and log events.
+- Line 63: Update the user-count operation in RegisterAsync to use the
+asynchronous CountAsync() API and await its result, replacing the synchronous
+_userManager.Users.Count() call while preserving the existing totalUsers
+behavior.
+- Around line 58-65: Update RegisterAsync to capture the IdentityResult returned
+by AddToRoleAsync and stop registration when role assignment fails; only build
+and return the JWT after the role has been persisted successfully, using the
+existing roleToAssign value.
+
+In `@backend/TaskManagementTool.Infrastructure/TaskService.cs`:
+- Around line 105-113: After SaveChangesAsync in the task update flow, reload
+the task together with its AssignedUser navigation before calling
+MapToDto(task). Ensure the response reflects the new assignee’s matching
+AssignedUserId and AssignedUserName when an administrator changes
+dto.AssignedUserId.
+
+In `@backend/TaskManagementTool.Tests/TaskManagementTool.Tests.csproj`:
+- Line 12: Update TaskManagementTool.Tests so TaskServiceTests no longer rely on
+EF Core’s non-relational InMemory provider: replace the package reference with a
+relational SQLite in-memory provider and update GetDbContext() to configure and
+keep the SQLite connection open for each test. Add SQL Server integration
+coverage for provider-specific query and transaction behavior, while moving pure
+unit tests away from EF persistence where appropriate.
+
+In `@frontend/src/App.css`:
+- Around line 312-420: Add a narrow-screen media query targeting .sidebar and
+.main-content: reflow or overlay the fixed 220px sidebar so it no longer
+consumes the full mobile width, and reduce .main-content padding for small
+viewports. Ensure task content remains usable without horizontal overflow while
+preserving the existing desktop layout.
+
+In `@frontend/src/context/AuthContext.jsx`:
+- Around line 9-25: Update login in AuthContext to stop persisting the bearer
+token and profile PII in localStorage; move authentication to HttpOnly, Secure,
+SameSite cookies with CSRF protection, and remove the localStorage token
+retrieval from the api service. Keep setUser limited to the in-memory
+authenticated profile state.
+
+In `@frontend/src/pages/Login.jsx`:
+- Around line 39-53: Associate every authentication form label with its
+corresponding input in Login.jsx lines 39-53 and Register.jsx lines 40-63:
+assign unique ids to the email and password inputs in Login.jsx and the
+full-name, email, and password inputs in Register.jsx, then set each matching
+label’s htmlFor value to the respective id.
+
+In `@frontend/src/pages/NewTask.jsx`:
+- Around line 77-102: Update the form markup in the NewTask component so each
+label is associated with its control: add unique ids to the description,
+dueDate, priority, status, and category controls, and set each corresponding
+label’s htmlFor to the matching id. Preserve the existing name, value, and
+change-handling behavior.
+
+In `@frontend/src/services/api.js`:
+- Around line 3-7: The api client’s BASE_URL currently hardcodes the HTTP
+development endpoint; update the BASE_URL configuration in api.js to read
+VITE_API_BASE_URL and fall back to the HTTPS API origin from
+launchSettings.json, preserving the /api path for requests.
+
+---
+
+Minor comments:
+In `@backend/TaskManagementTool.API/TaskManagementTool.API.http`:
+- Around line 3-4: Update the sample GET request in TaskManagementTool.API.http
+to target an endpoint actually mapped by the application, replacing
+/weatherforecast/ with an existing route such as /api/users or /api/tasks while
+preserving the JSON Accept header.
+
+In `@frontend/index.html`:
+- Line 7: Update the document title in the HTML head from the generic “frontend”
+value to an application-specific title that identifies the task management
+application, preserving the existing title element.
+
+In `@frontend/src/context/AuthContext.jsx`:
+- Around line 6-7: Update AuthProvider’s persisted-user initialization to parse
+localStorage.user inside a try block; when parsing fails, remove both user and
+token from localStorage and initialize state as unauthenticated with a null
+user.
+
+In `@frontend/src/pages/Dashboard.jsx`:
+- Around line 15-23: Update the request flows in
+frontend/src/pages/Dashboard.jsx (lines 15-23) and
+frontend/src/pages/TaskList.jsx (lines 18-27) to store errors from
+getDashboardCounts and the task-list request, respectively. Render an explicit
+error state when a request fails, instead of showing zero dashboard counts or
+the “No tasks found” empty-list message; preserve the existing successful and
+loading states.
+
+---
+
+Nitpick comments:
+In `@frontend/README.md`:
+- Around line 1-16: Replace the template content in the README with
+documentation for the task management frontend, including installation steps,
+development commands, the required API URL configuration, and the backend
+startup dependency. Remove the generic Vite and React template guidance while
+preserving accurate commands and configuration details for this application.
+```
+
+</details>
+
+<details>
+<summary>🪄 Autofix</summary>
+
+Fix all unresolved CodeRabbit comments on this PR:
+
+- [ ] <!-- {"checkboxId": "4b0d0e0a-96d7-4f10-b296-3a18ea78f0b9"} --> Push a commit to this branch (recommended)
+- [ ] <!-- {"checkboxId": "ff5b1114-7d8c-49e6-8ac1-43f82af23a33"} --> Create a new PR with the fixes
+
+</details>
+
+---
+
+<details>
+<summary>ℹ️ Review info</summary>
+
+<details>
+<summary>⚙️ Run configuration</summary>
+
+**Configuration used**: Path: .coderabbit.yaml
+
+**Review profile**: CHILL
+
+**Plan**: Pro Plus
+
+**Run ID**: `f6a602eb-a908-4a92-9fba-3203bf42f352`
+
+</details>
+
+<details>
+<summary>📥 Commits</summary>
+
+Reviewing files that changed from the base of the PR and between 11384a1011ee4eae1d3d3a6214a5c30de0436ad1 and 13f56e72d2eab9d8a58dfc98501596c14205546b.
+
+</details>
+
+<details>
+<summary>⛔ Files ignored due to path filters (6)</summary>
+
+* `frontend/package-lock.json` is excluded by `!**/package-lock.json`
+* `frontend/public/favicon.svg` is excluded by `!**/*.svg`
+* `frontend/public/icons.svg` is excluded by `!**/*.svg`
+* `frontend/src/assets/hero.png` is excluded by `!**/*.png`
+* `frontend/src/assets/react.svg` is excluded by `!**/*.svg`
+* `frontend/src/assets/vite.svg` is excluded by `!**/*.svg`
+
+</details>
+
+<details>
+<summary>📒 Files selected for processing (67)</summary>
+
+* `.gitignore`
+* `README.md`
+* `backend/.postman/resources.yaml`
+* `backend/TaskManagementTool.API/Controller/AuthController.cs`
+* `backend/TaskManagementTool.API/Controller/TasksController.cs`
+* `backend/TaskManagementTool.API/Controller/UsersController.cs`
+* `backend/TaskManagementTool.API/Middleware/ExceptionMiddleware.cs`
+* `backend/TaskManagementTool.API/Program.cs`
+* `backend/TaskManagementTool.API/Properties/launchSettings.json`
+* `backend/TaskManagementTool.API/TaskManagementTool.API.csproj`
+* `backend/TaskManagementTool.API/TaskManagementTool.API.http`
+* `backend/TaskManagementTool.API/appsettings.Development.json`
+* `backend/TaskManagementTool.API/appsettings.json`
+* `backend/TaskManagementTool.Application/Class1.cs`
+* `backend/TaskManagementTool.Application/DTOs/Auth/AuthResponseDto.cs`
+* `backend/TaskManagementTool.Application/DTOs/Auth/LoginRequestDto.cs`
+* `backend/TaskManagementTool.Application/DTOs/Auth/RegisterRequestDto.cs`
+* `backend/TaskManagementTool.Application/DTOs/Tasks/DashboardCountsDto.cs`
+* `backend/TaskManagementTool.Application/DTOs/Tasks/TaskCreateUpdateDto.cs`
+* `backend/TaskManagementTool.Application/DTOs/Tasks/TaskDto.cs`
+* `backend/TaskManagementTool.Application/DTOs/Users/UserDto.cs`
+* `backend/TaskManagementTool.Application/Exceptions/ApiException.cs`
+* `backend/TaskManagementTool.Application/Exceptions/IAuthService.cs`
+* `backend/TaskManagementTool.Application/TaskManagementTool.Application.csproj`
+* `backend/TaskManagementTool.Domain/Entities/ApplicationUser.cs`
+* `backend/TaskManagementTool.Domain/Entities/AuditLog.cs`
+* `backend/TaskManagementTool.Domain/Entities/Enums.cs`
+* `backend/TaskManagementTool.Domain/Entities/TaskItem.cs`
+* `backend/TaskManagementTool.Domain/TaskManagementTool.Domain.csproj`
+* `backend/TaskManagementTool.Infrastructure/Class1.cs`
+* `backend/TaskManagementTool.Infrastructure/Data/AppDbContext.cs`
+* `backend/TaskManagementTool.Infrastructure/ITaskService.cs`
+* `backend/TaskManagementTool.Infrastructure/Migrations/20260720211333_InitialCreate.Designer.cs`
+* `backend/TaskManagementTool.Infrastructure/Migrations/20260720211333_InitialCreate.cs`
+* `backend/TaskManagementTool.Infrastructure/Migrations/AppDbContextModelSnapshot.cs`
+* `backend/TaskManagementTool.Infrastructure/Services/AuthService.cs`
+* `backend/TaskManagementTool.Infrastructure/TaskManagementTool.Infrastructure.csproj`
+* `backend/TaskManagementTool.Infrastructure/TaskService.cs`
+* `backend/TaskManagementTool.Tests/AuthServiceTests.cs`
+* `backend/TaskManagementTool.Tests/TaskManagementTool.Tests.csproj`
+* `backend/TaskManagementTool.Tests/TaskServiceTests.cs`
+* `backend/TaskManagementTool.slnx`
+* `backend/postman/globals/workspace.globals.yaml`
+* `frontend/.gitignore`
+* `frontend/README.md`
+* `frontend/eslint.config.js`
+* `frontend/index.html`
+* `frontend/package.json`
+* `frontend/src/App.css`
+* `frontend/src/App.jsx`
+* `frontend/src/components/Navbar.jsx`
+* `frontend/src/components/ProtectedRoute.jsx`
+* `frontend/src/components/Sidebar.jsx`
+* `frontend/src/context/AuthContext.jsx`
+* `frontend/src/index.css`
+* `frontend/src/main.jsx`
+* `frontend/src/pages/Dashboard.jsx`
+* `frontend/src/pages/Login.jsx`
+* `frontend/src/pages/NewTask.jsx`
+* `frontend/src/pages/Profile.jsx`
+* `frontend/src/pages/Register.jsx`
+* `frontend/src/pages/TaskDetail.jsx`
+* `frontend/src/pages/TaskList.jsx`
+* `frontend/src/services/api.js`
+* `frontend/src/services/authService.js`
+* `frontend/src/services/taskService.js`
+* `frontend/vite.config.js`
+
+</details>
+
+</details>
+
+<!-- This is an auto-generated comment by CodeRabbit for review status -->
+--
