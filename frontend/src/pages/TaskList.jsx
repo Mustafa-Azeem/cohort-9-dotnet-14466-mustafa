@@ -32,7 +32,9 @@ function TaskList() {
       if (!Array.isArray(data)) {
         throw new Error("Unexpected response shape");
       }
-      setTasks(data);
+      // Filter out any items missing required fields to avoid runtime errors in the list
+      const validTasks = data.filter((t) => t && t.priority != null && t.status != null);
+      setTasks(validTasks);
     } catch (err) {
       if (requestId !== latestRequestId.current) return;
       setError("Couldn't load tasks. Please try again.");
@@ -50,7 +52,7 @@ function TaskList() {
     if (!window.confirm("Delete this task?")) return;
     try {
       await deleteTask(id);
-      setTasks(tasks.filter((t) => t.id !== id));
+      setTasks((prev) => prev.filter((t) => t.id !== id));
     } catch (err) {
       alert("Couldn't delete task");
     }

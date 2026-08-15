@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getTaskById, deleteTask } from "../services/taskService";
 import Navbar from "../components/Navbar";
@@ -9,17 +9,26 @@ function TaskDetail() {
   const [task, setTask] = useState(null);
   const [error, setError] = useState("");
 
+  // guard against stale request writes when route id changes
+  const latestRequestId = useRef(0);
+
   useEffect(() => {
+    // reset view state on id change
+    setTask(null);
+    setError("");
     loadTask();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadTask = async () => {
+    const requestId = ++latestRequestId.current;
     try {
       const data = await getTaskById(id);
+      if (requestId !== latestRequestId.current) return; // stale
       setTask(data);
     } catch (err) {
-      setError(err.response?.data?.error || "Task not found");
+      if (requestId !== latestRequestId.current) return;
+      setError(err?.response?.data?.error || "Task not found");
     }
   };
 

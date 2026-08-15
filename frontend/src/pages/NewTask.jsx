@@ -4,6 +4,7 @@ import { createTask, getTaskById, updateTask } from "../services/taskService";
 import { getAllUsers } from "../services/userService";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import { getErrorMessage } from "../utils/errorHelper";
 
 function NewTask() {
   const { id } = useParams();
@@ -29,6 +30,9 @@ function NewTask() {
   const [existingLoaded, setExistingLoaded] = useState(!isEditMode);
 
   useEffect(() => {
+    // reset existingLoaded when the route id changes so the form disables until the new existing task is loaded
+    setExistingLoaded(!isEditMode);
+
     if (isAdmin) {
       loadUsers();
     }
@@ -61,7 +65,7 @@ function NewTask() {
       });
       setExistingLoaded(true);
     } catch (err) {
-      setError("Couldn't load task details");
+      setError(getErrorMessage(err, "Couldn't load task details"));
     }
   };
 
@@ -82,7 +86,7 @@ function NewTask() {
       }
       navigate("/tasks");
     } catch (err) {
-      setError(err.response?.data?.error || "Something went wrong saving the task");
+      setError(getErrorMessage(err, "Something went wrong saving the task"));
     } finally {
       setLoading(false);
     }
