@@ -1,6 +1,6 @@
 # Task Management Tool — Frontend
 
-React (Vite) frontend for the Task Management Tool. Talks to the ASP.NET Core backend via JWT-authenticated REST calls.
+React (Vite) frontend for the Task Management Tool. Talks to the ASP.NET Core backend via JWT-authenticated REST calls and uses httpOnly cookies for authentication.
 
 ## Setup
 
@@ -9,7 +9,7 @@ npm install
 ```
 
 Create a `.env` file (see `.env` example already in this folder) with:
-```
+```dotenv
 VITE_API_BASE_URL=http://localhost:5223/api
 ```
 Update the URL/port if your backend runs elsewhere.

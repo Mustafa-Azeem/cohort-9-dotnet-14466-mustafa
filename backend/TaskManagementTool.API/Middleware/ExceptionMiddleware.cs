@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Text.Json;
 using TaskManagementTool.Application.Exceptions;
@@ -11,6 +12,9 @@ public class ExceptionMiddleware
 
     public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
+        ArgumentNullException.ThrowIfNull(next);
+        ArgumentNullException.ThrowIfNull(logger);
+
         _next = next;
         _logger = logger;
     }
