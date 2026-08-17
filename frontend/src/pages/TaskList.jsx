@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getTasks, deleteTask } from "../services/taskService";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
 function TaskList() {
   const [tasks, setTasks] = useState([]);
@@ -11,7 +11,6 @@ function TaskList() {
   const [priorityFilter, setPriorityFilter] = useState("");
   const [search, setSearch] = useState("");
 
-  // guards against an older, slower request overwriting a newer one's result
   const latestRequestId = useRef(0);
 
   useEffect(() => {
@@ -26,15 +25,9 @@ function TaskList() {
 
     try {
       const data = await getTasks({ status: statusFilter, priority: priorityFilter, search });
-
-      if (requestId !== latestRequestId.current) return; // a newer request already superseded this one
-
-      if (!Array.isArray(data)) {
-        throw new Error("Unexpected response shape");
-      }
-      // Filter out any items missing required fields to avoid runtime errors in the list
-      const validTasks = data.filter((t) => t && t.priority != null && t.status != null);
-      setTasks(validTasks);
+      if (requestId !== latestRequestId.current) return;
+      if (!Array.isArray(data)) throw new Error("Unexpected response shape");
+      setTasks(data);
     } catch (err) {
       if (requestId !== latestRequestId.current) return;
       setError("Couldn't load tasks. Please try again.");
@@ -52,16 +45,16 @@ function TaskList() {
     if (!window.confirm("Delete this task?")) return;
     try {
       await deleteTask(id);
-      setTasks((prev) => prev.filter((t) => t.id !== id));
+      setTasks(tasks.filter((t) => t.id !== id));
     } catch (err) {
       alert("Couldn't delete task");
     }
   };
 
   return (
-    <div className="page-wrapper">
-      <Navbar />
-      <div className="page-content">
+    <div className="app-layout">
+      <Sidebar />
+      <main className="main-content">
         <div className="page-header-row">
           <h1>Tasks</h1>
           <Link to="/tasks/new" className="btn-primary">+ New Task</Link>
@@ -113,7 +106,7 @@ function TaskList() {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

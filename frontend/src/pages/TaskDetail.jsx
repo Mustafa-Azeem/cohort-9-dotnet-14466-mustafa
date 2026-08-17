@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getTaskById, deleteTask } from "../services/taskService";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
 function TaskDetail() {
   const { id } = useParams();
@@ -9,26 +9,17 @@ function TaskDetail() {
   const [task, setTask] = useState(null);
   const [error, setError] = useState("");
 
-  // guard against stale request writes when route id changes
-  const latestRequestId = useRef(0);
-
   useEffect(() => {
-    // reset view state on id change
-    setTask(null);
-    setError("");
     loadTask();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadTask = async () => {
-    const requestId = ++latestRequestId.current;
     try {
       const data = await getTaskById(id);
-      if (requestId !== latestRequestId.current) return; // stale
       setTask(data);
     } catch (err) {
-      if (requestId !== latestRequestId.current) return;
-      setError(err?.response?.data?.error || "Task not found");
+      setError(err.response?.data?.error || "Task not found");
     }
   };
 
@@ -44,30 +35,30 @@ function TaskDetail() {
 
   if (error) {
     return (
-      <div className="page-wrapper">
-        <Navbar />
-        <div className="page-content">
-          <p className="error-box">{error}</p>
-        </div>
+      <div className="app-layout">
+        <Sidebar />
+        <main className="main-content">
+          <p className="error-box" role="alert">{error}</p>
+        </main>
       </div>
     );
   }
 
   if (!task) {
     return (
-      <div className="page-wrapper">
-        <Navbar />
-        <div className="page-content">
+      <div className="app-layout">
+        <Sidebar />
+        <main className="main-content">
           <p>Loading...</p>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="page-wrapper">
-      <Navbar />
-      <div className="page-content">
+    <div className="app-layout">
+      <Sidebar />
+      <main className="main-content">
         <h1>{task.title}</h1>
         <div className="task-detail-card">
           <p><strong>Description:</strong> {task.description || "No description"}</p>
@@ -82,7 +73,7 @@ function TaskDetail() {
             <button className="btn-danger" onClick={handleDelete}>Delete</button>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
