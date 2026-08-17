@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { createTask, getTaskById, updateTask } from "../services/taskService";
 import { getAllUsers } from "../services/userService";
 import { useAuth } from "../context/AuthContext";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
 function NewTask() {
   const { id } = useParams();
@@ -23,18 +23,11 @@ function NewTask() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // in edit mode we must not let the user submit stale/default form values
-  // before the real task data has finished loading
   const [existingLoaded, setExistingLoaded] = useState(!isEditMode);
 
   useEffect(() => {
-    if (isAdmin) {
-      loadUsers();
-    }
-    if (isEditMode) {
-      loadExisting();
-    }
+    if (isAdmin) loadUsers();
+    if (isEditMode) loadExisting();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isAdmin]);
 
@@ -89,9 +82,9 @@ function NewTask() {
   };
 
   return (
-    <div className="page-wrapper">
-      <Navbar />
-      <div className="page-content">
+    <div className="app-layout">
+      <Sidebar />
+      <main className="main-content">
         <h1>{isEditMode ? "Edit Task" : "New Task"}</h1>
 
         <form className="task-form" onSubmit={handleSubmit}>
@@ -142,7 +135,7 @@ function NewTask() {
             {loading ? "Saving..." : !existingLoaded ? "Loading task..." : isEditMode ? "Update Task" : "Create Task"}
           </button>
         </form>
-      </div>
+      </main>
     </div>
   );
 }
