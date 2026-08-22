@@ -65,7 +65,6 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 
-    // read the jwt from the httpOnly cookie instead of an Authorization header
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -98,6 +97,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -121,8 +121,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// seed a single admin account at startup so nobody can grant themselves
-// admin through public registration. only runs if no admin exists yet
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();

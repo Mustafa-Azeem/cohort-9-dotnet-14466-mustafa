@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { loginUser, registerUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../utils/errorHelper";
+import Mascot from "../components/Mascot";
 import "./AuthCard.css";
 
 const Hero = ({ type, active, title, text, buttonText, onClick }) => (
@@ -19,6 +20,8 @@ function AuthCard() {
   const [view, setView] = useState("signup");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [showTip, setShowTip] = useState(false);
 
   const [signupForm, setSignupForm] = useState({ fullName: "", email: "", password: "" });
   const [signinForm, setSigninForm] = useState({ email: "", password: "" });
@@ -67,6 +70,17 @@ function AuthCard() {
 
   return (
     <section className="page auth-card-page">
+      <div className="mascot-wrapper" onClick={() => setShowTip((s) => !s)}>
+        <Mascot passwordFocused={passwordFocused} />
+        {showTip && (
+          <div className="mascot-tip">
+            {isSignup
+              ? "Fill in your details and I'll get you started!"
+              : "Enter your email and password to log in."}
+          </div>
+        )}
+      </div>
+
       <div className="card">
         <div className="card-bg" style={{ translate: isSignup ? 0 : "100%" }} />
 
@@ -89,6 +103,7 @@ function AuthCard() {
               placeholder="Full Name"
               value={signupForm.fullName}
               onChange={handleSignupChange}
+              onFocus={() => setPasswordFocused(false)}
               required
             />
             <input
@@ -97,6 +112,7 @@ function AuthCard() {
               placeholder="Email"
               value={signupForm.email}
               onChange={handleSignupChange}
+              onFocus={() => setPasswordFocused(false)}
               required
             />
             <input
@@ -105,6 +121,8 @@ function AuthCard() {
               placeholder="Password"
               value={signupForm.password}
               onChange={handleSignupChange}
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
               minLength={8}
               required
             />
@@ -131,6 +149,7 @@ function AuthCard() {
               placeholder="Email"
               value={signinForm.email}
               onChange={handleSigninChange}
+              onFocus={() => setPasswordFocused(false)}
               required
             />
             <input
@@ -139,8 +158,11 @@ function AuthCard() {
               placeholder="Password"
               value={signinForm.password}
               onChange={handleSigninChange}
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
               required
             />
+            <Link to="/forgot-password" className="forgot-link">Forgot password?</Link>
             <button disabled={loading}>{loading ? "..." : "SIGN IN"}</button>
           </form>
         </div>

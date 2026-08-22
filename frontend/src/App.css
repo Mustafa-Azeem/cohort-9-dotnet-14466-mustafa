@@ -471,3 +471,17 @@ body {
     flex-direction: column;
   }
 }
+/* ==== Success message box ==== */
+
+.success-box {
+  background: #dcfce7;
+  color: #166534;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.status-created { background: #dcfce7; color: #166534; }
+.status-updated { background: #dbeafe; color: #1d4ed8; }
+.status-deleted { background: #fee2e2; color: #b91c1c; }

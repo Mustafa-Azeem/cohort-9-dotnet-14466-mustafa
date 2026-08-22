@@ -61,8 +61,6 @@ public class AuthService : IAuthService
         var roleResult = await _userManager.AddToRoleAsync(newUser, "User");
         if (!roleResult.Succeeded)
         {
-            // don't leave a half-created account behind - a retry would otherwise
-            // hit "email already in use" even though registration never really succeeded
             await _userManager.DeleteAsync(newUser);
             _logger.LogError("Failed to assign role to new user, rolled back account creation");
             throw new ApiException("Registration failed, please try again", 500);
@@ -95,6 +93,44 @@ public class AuthService : IAuthService
         _logger.LogInformation("User {UserId} logged in", user.Id);
 
         return await BuildAuthResponse(user, role);
+    }
+
+    public async Task<string?> ForgotPasswordAsync(ForgotPasswordRequestDto request)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+
+        // don't reveal whether the email exists - always behave the same either way
+        if (user == null)
+        {
+            _logger.LogInformation("Password reset requested for an email with no matching account");
+            return null;
+        }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        // no email provider hooked up yet - log it server-side so it can be tested locally.
+        // in production this token would be emailed to the user, never returned to the client
+        _logger.LogInformation("Password reset token generated for user {UserId}", user.Id);
+
+        return token;
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordRequestDto request)
+    {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user == null)
+        {
+            throw new ApiException("Invalid or expired reset request", 400);
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new ApiException(errors, 400);
+        }
+
+        _logger.LogInformation("Password reset completed for user {UserId}", user.Id);
     }
 
     private Task<AuthResponseDto> BuildAuthResponse(ApplicationUser user, string role)

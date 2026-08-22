@@ -2,12 +2,19 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using TaskManagementTool.Application.Exceptions;
+using TaskManagementTool.Application.Interfaces;
 using TaskManagementTool.Domain.Entities;
 using TaskManagementTool.Infrastructure.Data;
 using TaskManagementTool.Infrastructure.Services;
 using Xunit;
 
 namespace TaskManagementTool.Tests;
+
+// no-op audit logger for tests - we're not asserting on audit behavior here
+public class FakeAuditService : IAuditService
+{
+    public Task LogAsync(string userId, string action, string? details = null) => Task.CompletedTask;
+}
 
 public class TaskServiceTests : IDisposable
 {
@@ -28,6 +35,9 @@ public class TaskServiceTests : IDisposable
         return db;
     }
 
+    private static TaskService GetService(AppDbContext db) =>
+        new(db, NullLogger<TaskService>.Instance, new FakeAuditService());
+
     public void Dispose()
     {
         foreach (var connection in _connections)
@@ -41,7 +51,7 @@ public class TaskServiceTests : IDisposable
         db.Users.Add(new ApplicationUser { Id = "user1", FullName = "Test User", Email = "u@test.com" });
         await db.SaveChangesAsync();
 
-        var service = new TaskService(db, NullLogger<TaskService>.Instance);
+        var service = GetService(db);
 
         var dto = new Application.DTOs.Tasks.TaskCreateUpdateDto
         {
@@ -66,7 +76,7 @@ public class TaskServiceTests : IDisposable
         db.Tasks.Add(new TaskItem { Title = "Task B", AssignedUserId = "user2", CreatedByUserId = "user2" });
         await db.SaveChangesAsync();
 
-        var service = new TaskService(db, NullLogger<TaskService>.Instance);
+        var service = GetService(db);
 
         var tasks = await service.GetTasksAsync("user1", isAdmin: false, null, null, null);
 
@@ -84,7 +94,7 @@ public class TaskServiceTests : IDisposable
         db.Tasks.Add(new TaskItem { Title = "Task B", AssignedUserId = "user2", CreatedByUserId = "user2" });
         await db.SaveChangesAsync();
 
-        var service = new TaskService(db, NullLogger<TaskService>.Instance);
+        var service = GetService(db);
 
         var tasks = await service.GetTasksAsync("admin1", isAdmin: true, null, null, null);
 
@@ -100,7 +110,7 @@ public class TaskServiceTests : IDisposable
         db.Tasks.Add(new TaskItem { Id = 1, Title = "Task A", AssignedUserId = "user1", CreatedByUserId = "user1" });
         await db.SaveChangesAsync();
 
-        var service = new TaskService(db, NullLogger<TaskService>.Instance);
+        var service = GetService(db);
 
         await Assert.ThrowsAsync<ApiException>(() =>
             service.DeleteTaskAsync(1, "user2", isAdmin: false));
@@ -114,7 +124,7 @@ public class TaskServiceTests : IDisposable
         db.Tasks.Add(new TaskItem { Id = 1, Title = "Task A", AssignedUserId = "user1", CreatedByUserId = "user1" });
         await db.SaveChangesAsync();
 
-        var service = new TaskService(db, NullLogger<TaskService>.Instance);
+        var service = GetService(db);
         await service.DeleteTaskAsync(1, "user1", isAdmin: false);
 
         var stillExists = await db.Tasks.IgnoreQueryFilters().AnyAsync(t => t.Id == 1);
@@ -131,7 +141,7 @@ public class TaskServiceTests : IDisposable
         db.Tasks.Add(new TaskItem { Title = "C", AssignedUserId = "u1", Status = TaskManagementTool.Domain.Entities.JobStatus.Completed });
         await db.SaveChangesAsync();
 
-        var service = new TaskService(db, NullLogger<TaskService>.Instance);
+        var service = GetService(db);
         var counts = await service.GetDashboardCountsAsync("u1", isAdmin: false);
 
         Assert.Equal(1, counts.Pending);

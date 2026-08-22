@@ -44,7 +44,6 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        // path must match what SetAuthCookie used, or the browser won't overwrite it
         Response.Cookies.Delete("access_token", new CookieOptions { Path = "/" });
         return NoContent();
     }
@@ -65,6 +64,35 @@ public class AuthController : ControllerBase
             Email = email,
             Role = role
         });
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var token = await _authService.ForgotPasswordAsync(request);
+
+        // no email provider wired up yet - in dev, hand the token back directly so the
+        // reset flow can be tested end to end. never do this in production.
+        if (_env.IsDevelopment() && token != null)
+        {
+            return Ok(new { message = "Reset token generated (dev mode only).", token });
+        }
+
+        // always the same response whether or not the email exists - avoids leaking account info
+        return Ok(new { message = "If that email is registered, a reset link has been sent." });
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        await _authService.ResetPasswordAsync(request);
+        return Ok(new { message = "Password has been reset. You can now log in." });
     }
 
     private void SetAuthCookie(string token, DateTime expiresAt)
