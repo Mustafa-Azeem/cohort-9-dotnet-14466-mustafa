@@ -20,7 +20,7 @@ function AuthCard() {
   const [view, setView] = useState("signup");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [mood, setMood] = useState("idle");
   const [showTip, setShowTip] = useState(false);
 
   const [signupForm, setSignupForm] = useState({ fullName: "", email: "", password: "" });
@@ -45,9 +45,11 @@ function AuthCard() {
     try {
       const data = await registerUser(signupForm.fullName, signupForm.email, signupForm.password);
       login(data);
-      navigate("/dashboard");
+      setMood("happy");
+      setTimeout(() => navigate("/dashboard"), 700);
     } catch (err) {
       setError(getErrorMessage(err, "Registration failed"));
+      setMood("sad");
     } finally {
       setLoading(false);
     }
@@ -60,9 +62,11 @@ function AuthCard() {
     try {
       const data = await loginUser(signinForm.email, signinForm.password);
       login(data);
-      navigate("/dashboard");
+      setMood("happy");
+      setTimeout(() => navigate("/dashboard"), 700);
     } catch (err) {
       setError(getErrorMessage(err, "Login failed, check your credentials"));
+      setMood("sad");
     } finally {
       setLoading(false);
     }
@@ -70,18 +74,19 @@ function AuthCard() {
 
   return (
     <section className="page auth-card-page">
-      <div className="mascot-wrapper" onClick={() => setShowTip((s) => !s)}>
-        <Mascot passwordFocused={passwordFocused} />
-        {showTip && (
-          <div className="mascot-tip">
-            {isSignup
-              ? "Fill in your details and I'll get you started!"
-              : "Enter your email and password to log in."}
-          </div>
-        )}
-      </div>
+      <div className="auth-card-stack">
+        <div className="mascot-wrapper" onClick={() => setShowTip((s) => !s)}>
+          <Mascot mood={mood} />
+          {showTip && (
+            <div className="mascot-tip">
+              {isSignup
+                ? "Fill in your details and I'll get you started!"
+                : "Enter your email and password to log in."}
+            </div>
+          )}
+        </div>
 
-      <div className="card">
+        <div className="card">
         <div className="card-bg" style={{ translate: isSignup ? 0 : "100%" }} />
 
         <Hero
@@ -103,7 +108,7 @@ function AuthCard() {
               placeholder="Full Name"
               value={signupForm.fullName}
               onChange={handleSignupChange}
-              onFocus={() => setPasswordFocused(false)}
+              onFocus={() => setMood("idle")}
               required
             />
             <input
@@ -112,7 +117,7 @@ function AuthCard() {
               placeholder="Email"
               value={signupForm.email}
               onChange={handleSignupChange}
-              onFocus={() => setPasswordFocused(false)}
+              onFocus={() => setMood("idle")}
               required
             />
             <input
@@ -121,8 +126,10 @@ function AuthCard() {
               placeholder="Password"
               value={signupForm.password}
               onChange={handleSignupChange}
-              onFocus={() => setPasswordFocused(true)}
-              onBlur={() => setPasswordFocused(false)}
+              onFocus={() => setMood("shy")}
+              onBlur={() => setMood((currentMood) =>
+                loading || currentMood === "happy" || currentMood === "sad" ? currentMood : "idle"
+              )}
               minLength={8}
               required
             />
@@ -149,7 +156,7 @@ function AuthCard() {
               placeholder="Email"
               value={signinForm.email}
               onChange={handleSigninChange}
-              onFocus={() => setPasswordFocused(false)}
+              onFocus={() => setMood("idle")}
               required
             />
             <input
@@ -158,13 +165,16 @@ function AuthCard() {
               placeholder="Password"
               value={signinForm.password}
               onChange={handleSigninChange}
-              onFocus={() => setPasswordFocused(true)}
-              onBlur={() => setPasswordFocused(false)}
+              onFocus={() => setMood("shy")}
+              onBlur={() => setMood((currentMood) =>
+                loading || currentMood === "happy" || currentMood === "sad" ? currentMood : "idle"
+              )}
               required
             />
             <Link to="/forgot-password" className="forgot-link">Forgot password?</Link>
             <button disabled={loading}>{loading ? "..." : "SIGN IN"}</button>
           </form>
+        </div>
         </div>
       </div>
     </section>
