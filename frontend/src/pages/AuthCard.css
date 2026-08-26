@@ -1,6 +1,7 @@
 .page.auth-card-page {
   --gradient: linear-gradient(-35deg, #16a34a, #15803d);
   --muted: #8d889d;
+
   background: #f4f6f8;
   color: #1f2937;
   height: 100vh;

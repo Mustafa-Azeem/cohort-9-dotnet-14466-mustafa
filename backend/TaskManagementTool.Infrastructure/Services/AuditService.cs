@@ -13,7 +13,7 @@ public class AuditService : IAuditService
         _db = db;
     }
 
-    public async Task LogAsync(string userId, string action, string? details = null)
+    public Task LogAsync(string userId, string action, string? details = null)
     {
         _db.AuditLogs.Add(new AuditLog
         {
@@ -22,6 +22,6 @@ public class AuditService : IAuditService
             Details = details
         });
 
-        await _db.SaveChangesAsync();
+        return Task.CompletedTask;
     }
 }

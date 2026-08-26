@@ -5,5 +5,13 @@ export const getAuditLogs = async () => {
   if (!Array.isArray(res.data)) {
     throw new Error("Unexpected response shape");
   }
-  return res.data;
+  
+  // Filter out any records missing required fields (id, userName, action, timestamp)
+  return res.data.filter(record => 
+    record && 
+    record.id != null && 
+    record.userName != null && 
+    record.action != null && 
+    record.timestamp != null
+  );
 };

@@ -23,6 +23,7 @@ public class TaskService : ITaskService
 
     public async Task<List<TaskDto>> GetTasksAsync(string currentUserId, bool isAdmin, string? status, string? priority, string? search)
     {
+        // Soft-deleted rows are automatically excluded via global query filter on TaskItem.IsDeleted in AppDbContext
         var query = _db.Tasks.Include(t => t.AssignedUser).AsQueryable();
 
         if (!isAdmin)
@@ -73,10 +74,12 @@ public class TaskService : ITaskService
         };
 
         _db.Tasks.Add(task);
-        await _db.SaveChangesAsync();
-
+        
+        // Add audit log before SaveChangesAsync for atomic transaction
         _logger.LogInformation("Task created: {TaskId} by {UserId}", task.Id, currentUserId);
         await _auditService.LogAsync(currentUserId, "TaskCreated", $"Task '{task.Title}' (#{task.Id})");
+        
+        await _db.SaveChangesAsync();
 
         var saved = await _db.Tasks.Include(t => t.AssignedUser).FirstAsync(t => t.Id == task.Id);
         return MapToDto(saved);
@@ -108,13 +111,14 @@ public class TaskService : ITaskService
         if (isAdmin && !string.IsNullOrEmpty(dto.AssignedUserId))
             task.AssignedUserId = dto.AssignedUserId;
 
-        await _db.SaveChangesAsync();
-
         _logger.LogInformation("Task updated: {TaskId} by {UserId}", task.Id, currentUserId);
 
         var reassigned = previousAssignee != task.AssignedUserId;
+        // Add audit log before SaveChangesAsync for atomic transaction
         await _auditService.LogAsync(currentUserId, "TaskUpdated",
             reassigned ? $"Task '{task.Title}' (#{task.Id}) reassigned" : $"Task '{task.Title}' (#{task.Id}) updated");
+
+        await _db.SaveChangesAsync();
 
         var updated = await _db.Tasks.Include(t => t.AssignedUser).FirstAsync(t => t.Id == task.Id);
         return MapToDto(updated);
@@ -130,14 +134,17 @@ public class TaskService : ITaskService
             throw new ApiException("You don't have access to this task", 403);
 
         task.IsDeleted = true;
-        await _db.SaveChangesAsync();
 
         _logger.LogInformation("Task soft-deleted: {TaskId} by {UserId}", task.Id, currentUserId);
+        // Add audit log before SaveChangesAsync for atomic transaction
         await _auditService.LogAsync(currentUserId, "TaskDeleted", $"Task '{task.Title}' (#{task.Id})");
+        
+        await _db.SaveChangesAsync();
     }
 
     public async Task<DashboardCountsDto> GetDashboardCountsAsync(string currentUserId, bool isAdmin)
     {
+        // Soft-deleted rows are automatically excluded via global query filter on TaskItem.IsDeleted in AppDbContext
         var query = _db.Tasks.AsQueryable();
         if (!isAdmin)
             query = query.Where(t => t.AssignedUserId == currentUserId);

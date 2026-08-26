@@ -127,10 +127,22 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-    if (!await roleManager.RoleExistsAsync("Admin"))
-        await roleManager.CreateAsync(new IdentityRole("Admin"));
-    if (!await roleManager.RoleExistsAsync("User"))
-        await roleManager.CreateAsync(new IdentityRole("User"));
+    // Create roles with error checking
+    var adminRoleExists = await roleManager.RoleExistsAsync("Admin");
+    if (!adminRoleExists)
+    {
+        var adminRoleResult = await roleManager.CreateAsync(new IdentityRole("Admin"));
+        if (!adminRoleResult.Succeeded)
+            throw new InvalidOperationException($"Failed to create Admin role: {string.Join(", ", adminRoleResult.Errors.Select(e => e.Description))}");
+    }
+    
+    var userRoleExists = await roleManager.RoleExistsAsync("User");
+    if (!userRoleExists)
+    {
+        var userRoleResult = await roleManager.CreateAsync(new IdentityRole("User"));
+        if (!userRoleResult.Succeeded)
+            throw new InvalidOperationException($"Failed to create User role: {string.Join(", ", userRoleResult.Errors.Select(e => e.Description))}");
+    }
 
     var adminsExist = (await userManager.GetUsersInRoleAsync("Admin")).Any();
     if (!adminsExist)
@@ -148,8 +160,12 @@ using (var scope = app.Services.CreateScope())
             };
 
             var createResult = await userManager.CreateAsync(adminUser, adminPassword);
-            if (createResult.Succeeded)
-                await userManager.AddToRoleAsync(adminUser, "Admin");
+            if (!createResult.Succeeded)
+                throw new InvalidOperationException($"Failed to create admin user: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+
+            var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
+            if (!roleResult.Succeeded)
+                throw new InvalidOperationException($"Failed to add admin user to Admin role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
         }
     }
 }

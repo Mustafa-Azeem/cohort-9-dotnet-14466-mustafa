@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { getAuditLogs } from "../services/auditLogService";
+import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 
 function AuditLog() {
+  const { isAdmin } = useAuth();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -29,6 +31,19 @@ function AuditLog() {
     if (action === "TaskDeleted") return "deleted";
     return action;
   };
+
+  // Admin-only guard
+  if (!isAdmin) {
+    return (
+      <div className="app-layout">
+        <Sidebar />
+        <main className="main-content">
+          <h1>Activity Log</h1>
+          <div className="error-box" role="alert">You don't have permission to access this page.</div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app-layout">

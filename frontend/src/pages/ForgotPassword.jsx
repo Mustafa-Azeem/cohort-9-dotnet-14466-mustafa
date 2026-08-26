@@ -24,7 +24,7 @@ function ForgotPassword() {
       // no email provider wired up yet, so we can jump straight to the reset page
       if (res.data.token) {
         setTimeout(() => {
-          navigate(`/reset-password?email=${encodeURIComponent(email)}&token=${encodeURIComponent(res.data.token)}`);
+          navigate("/reset-password", { state: { email, token: res.data.token } });
         }, 1200);
       }
     } catch (err) {

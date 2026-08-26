@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { loginUser, registerUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../utils/errorHelper";
@@ -17,7 +17,10 @@ const Hero = ({ type, active, title, text, buttonText, onClick }) => (
 );
 
 function AuthCard() {
-  const [view, setView] = useState("signup");
+  const location = useLocation();
+  const getInitialView = () => location.pathname === "/login" ? "signin" : "signup";
+  
+  const [view, setView] = useState(getInitialView());
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [mood, setMood] = useState("idle");
@@ -28,6 +31,11 @@ function AuthCard() {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Re-sync view if route changes while component is mounted
+  useEffect(() => {
+    setView(getInitialView());
+  }, [location.pathname]);
 
   const isSignup = view === "signup";
   const toggleView = () => {

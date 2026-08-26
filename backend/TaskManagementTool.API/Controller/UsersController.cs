@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TaskManagementTool.Application.DTOs.Users;
 using TaskManagementTool.Domain.Entities;
 
@@ -20,16 +21,16 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAllUsers()
+    public async Task<IActionResult> GetAllUsers()
     {
-        var users = _userManager.Users
+        var users = await _userManager.Users
             .Select(u => new UserDto
             {
                 Id = u.Id,
                 FullName = u.FullName,
                 Email = u.Email ?? string.Empty
             })
-            .ToList();
+            .ToListAsync();
 
         return Ok(users);
     }

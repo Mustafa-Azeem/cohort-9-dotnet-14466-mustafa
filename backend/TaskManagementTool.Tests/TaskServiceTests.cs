@@ -127,8 +127,9 @@ public class TaskServiceTests : IDisposable
         var service = GetService(db);
         await service.DeleteTaskAsync(1, "user1", isAdmin: false);
 
-        var stillExists = await db.Tasks.IgnoreQueryFilters().AnyAsync(t => t.Id == 1);
-        Assert.True(stillExists);
+        var task = await db.Tasks.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == 1);
+        Assert.NotNull(task);
+        Assert.True(task.IsDeleted);
     }
 
     [Fact]

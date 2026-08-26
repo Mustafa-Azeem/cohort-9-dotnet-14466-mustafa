@@ -74,11 +74,51 @@ public class AuthController : ControllerBase
 
         var token = await _authService.ForgotPasswordAsync(request);
 
-        // no email provider wired up yet - in dev, hand the token back directly so the
-        // reset flow can be tested end to end. never do this in production.
+        // in dev, hand the token back directly so the reset flow can be tested end to end.
         if (_env.IsDevelopment() && token != null)
         {
             return Ok(new { message = "Reset token generated (dev mode only).", token });
+        }
+
+        // outside development: check if email provider is configured
+        if (!_env.IsDevelopment())
+        {
+            var smtpHost = HttpContext.RequestServices.GetService<IConfiguration>()?["Smtp:Host"];
+            var smtpUser = HttpContext.RequestServices.GetService<IConfiguration>()?["Smtp:User"];
+            var smtpPassword = HttpContext.RequestServices.GetService<IConfiguration>()?["Smtp:Password"];
+
+            if (string.IsNullOrWhiteSpace(smtpHost) || string.IsNullOrWhiteSpace(smtpUser) || string.IsNullOrWhiteSpace(smtpPassword))
+            {
+                return StatusCode(503, new { error = "Password reset is currently unavailable. Please contact support." });
+            }
+
+            // send reset link via SMTP if provider is configured and token exists
+            if (token != null)
+            {
+                try
+                {
+                    var frontendResetUrl = HttpContext.RequestServices.GetService<IConfiguration>()?["Smtp:FrontendResetUrl"];
+                    var resetLink = $"{frontendResetUrl}?email={Uri.EscapeDataString(request.Email)}&token={Uri.EscapeDataString(token)}";
+                    
+                    using (var client = new System.Net.Mail.SmtpClient(smtpHost, 587))
+                    {
+                        client.EnableSsl = true;
+                        client.Credentials = new System.Net.NetworkCredential(smtpUser, smtpPassword);
+                        
+                        using (var message = new System.Net.Mail.MailMessage(smtpUser, request.Email))
+                        {
+                            message.Subject = "Password Reset Request";
+                            message.Body = $"Click the link below to reset your password:\n{resetLink}";
+                            message.IsBodyHtml = false;
+                            await client.SendMailAsync(message);
+                        }
+                    }
+                }
+                catch
+                {
+                    // log the error but still return generic response to avoid leaking account info
+                }
+            }
         }
 
         // always the same response whether or not the email exists - avoids leaking account info
