@@ -12,11 +12,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IWebHostEnvironment _env;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(IAuthService authService, IWebHostEnvironment env)
+    public AuthController(IAuthService authService, IWebHostEnvironment env, IConfiguration configuration)
     {
         _authService = authService;
         _env = env;
+        _configuration = configuration;
     }
 
     [HttpPost("register")]
@@ -83,15 +85,14 @@ public class AuthController : ControllerBase
         // outside development: check if email provider is configured
         if (!_env.IsDevelopment())
         {
-            var config = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
-            var smtpHost = config["Smtp:Host"];
-            var smtpUser = config["Smtp:User"];
-            var smtpPassword = config["Smtp:Password"];
-            var frontendResetUrl = config["Smtp:FrontendResetUrl"];
-            var portValue = config["Smtp:Port"];
+            var smtpHost = _configuration["Smtp:Host"];
+            var smtpUser = _configuration["Smtp:User"];
+            var smtpPassword = _configuration["Smtp:Password"];
+            var frontendResetUrl = _configuration["Smtp:FrontendResetUrl"];
+            var portValue = _configuration["Smtp:Port"];
             var hasValidPort = int.TryParse(portValue, out var smtpPort) && smtpPort > 0 && smtpPort <= 65535;
             var hasValidResetUrl = Uri.TryCreate(frontendResetUrl, UriKind.Absolute, out var frontendUri)
-                && (frontendUri.Scheme == Uri.UriSchemeHttp || frontendUri.Scheme == Uri.UriSchemeHttps);
+                && frontendUri.Scheme == Uri.UriSchemeHttps;
 
             if (string.IsNullOrWhiteSpace(smtpHost)
                 || string.IsNullOrWhiteSpace(smtpUser)
