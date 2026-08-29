@@ -1,13 +1,47 @@
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 
 function Profile() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
-  const initial = user?.fullName
-    ? user.fullName.charAt(0).toUpperCase()
-    : "U";
+  const initial = user?.fullName?.trim()?.charAt(0)?.toUpperCase() || "?";
+  const profileName = user?.fullName?.trim() || "Name unavailable";
+  const profileRole = user?.role?.trim() || "Role unavailable";
+  const profileEmail = user?.email?.trim() || "Email unavailable";
+  const joinedDate = user?.joinedDate?.trim() || "Date unavailable";
+  const status = user?.status?.trim() || "Status unavailable";
+
+  if (loading) {
+    return (
+      <div className="app-layout">
+        <Sidebar />
+        <main className="main-content">
+          <div className="profile-container">
+            <div className="profile-card">
+              <p>Loading profile...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="app-layout">
+        <Sidebar />
+        <main className="main-content">
+          <div className="profile-container">
+            <div className="profile-card">
+              <p className="error-box" role="alert">
+                Profile information is unavailable. Please sign in again.
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app-layout">
@@ -22,22 +56,12 @@ function Profile() {
           </div>
 
           <div className="profile-card">
-            {/* Sphere Avatar */}
             <div className="profile-avatar-large">{initial}</div>
 
-            {/* Profile Information */}
-            <h2 className="profile-name">{user?.fullName || "Minahil"}</h2>
-            <p className="profile-role">
-              {user?.role || "Senior Project Manager"}
-            </p>
-            <p className="profile-email">
-              {user?.email || "pandaminahil@gmail.com"}
-            </p>
-           <span>
- 
-	   </span>
+            <h2 className="profile-name">{profileName}</h2>
+            <p className="profile-role">{profileRole}</p>
+            <p className="profile-email">{profileEmail}</p>
 
-            {/* Account & Security Details Grid */}
             <div className="profile-info-grid">
               <div className="info-column">
                 <div className="column-header">
@@ -57,32 +81,12 @@ function Profile() {
                   <span>Account Information</span>
                 </div>
                 <div className="column-details">
-                  <p>Joined: {user?.joinedDate || "Jan 2023"}</p>
-                  <p>Status: {user?.status || "Active"}</p>
+                  <p>Joined: {joinedDate}</p>
+                  <p>Status: {status}</p>
                 </div>
               </div>
-              {/* <div className="info-column">
-                <div className="column-header">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <polyline points="9 12 11 14 15 10" />
-                  </svg>
-                  <span>Security Settings</span>
-                </div>
-                <div className="column-details"></div>
-              </div> */}
             </div>
 
-            {/* Actions */}
             <div className="profile-actions">
               <button className="btn-edit-profile">Edit Profile</button>
               <button className="btn-change-password">Change Password</button>

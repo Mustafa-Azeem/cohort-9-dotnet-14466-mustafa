@@ -83,11 +83,21 @@ public class AuthController : ControllerBase
         // outside development: check if email provider is configured
         if (!_env.IsDevelopment())
         {
-            var smtpHost = HttpContext.RequestServices.GetService<IConfiguration>()?["Smtp:Host"];
-            var smtpUser = HttpContext.RequestServices.GetService<IConfiguration>()?["Smtp:User"];
-            var smtpPassword = HttpContext.RequestServices.GetService<IConfiguration>()?["Smtp:Password"];
+            var config = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+            var smtpHost = config["Smtp:Host"];
+            var smtpUser = config["Smtp:User"];
+            var smtpPassword = config["Smtp:Password"];
+            var frontendResetUrl = config["Smtp:FrontendResetUrl"];
+            var portValue = config["Smtp:Port"];
+            var hasValidPort = int.TryParse(portValue, out var smtpPort) && smtpPort > 0 && smtpPort <= 65535;
+            var hasValidResetUrl = Uri.TryCreate(frontendResetUrl, UriKind.Absolute, out var frontendUri)
+                && (frontendUri.Scheme == Uri.UriSchemeHttp || frontendUri.Scheme == Uri.UriSchemeHttps);
 
-            if (string.IsNullOrWhiteSpace(smtpHost) || string.IsNullOrWhiteSpace(smtpUser) || string.IsNullOrWhiteSpace(smtpPassword))
+            if (string.IsNullOrWhiteSpace(smtpHost)
+                || string.IsNullOrWhiteSpace(smtpUser)
+                || string.IsNullOrWhiteSpace(smtpPassword)
+                || !hasValidPort
+                || !hasValidResetUrl)
             {
                 return StatusCode(503, new { error = "Password reset is currently unavailable. Please contact support." });
             }
@@ -97,14 +107,14 @@ public class AuthController : ControllerBase
             {
                 try
                 {
-                    var frontendResetUrl = HttpContext.RequestServices.GetService<IConfiguration>()?["Smtp:FrontendResetUrl"];
-                    var resetLink = $"{frontendResetUrl}?email={Uri.EscapeDataString(request.Email)}&token={Uri.EscapeDataString(token)}";
-                    
-                    using (var client = new System.Net.Mail.SmtpClient(smtpHost, 587))
+                    var resetUrlBase = frontendResetUrl.TrimEnd('/');
+                    var resetLink = $"{resetUrlBase}{(resetUrlBase.Contains('?') ? "&" : "?")}email={Uri.EscapeDataString(request.Email)}&token={Uri.EscapeDataString(token)}";
+
+                    using (var client = new System.Net.Mail.SmtpClient(smtpHost, smtpPort))
                     {
                         client.EnableSsl = true;
                         client.Credentials = new System.Net.NetworkCredential(smtpUser, smtpPassword);
-                        
+
                         using (var message = new System.Net.Mail.MailMessage(smtpUser, request.Email))
                         {
                             message.Subject = "Password Reset Request";

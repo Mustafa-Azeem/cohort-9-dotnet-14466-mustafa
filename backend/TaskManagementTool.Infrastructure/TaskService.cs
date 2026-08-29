@@ -73,13 +73,15 @@ public class TaskService : ITaskService
             CreatedByUserId = currentUserId
         };
 
+        using var transaction = await _db.Database.BeginTransactionAsync();
+
         _db.Tasks.Add(task);
-        
-        // Add audit log before SaveChangesAsync for atomic transaction
+        await _db.SaveChangesAsync();
+
         _logger.LogInformation("Task created: {TaskId} by {UserId}", task.Id, currentUserId);
         await _auditService.LogAsync(currentUserId, "TaskCreated", $"Task '{task.Title}' (#{task.Id})");
-        
         await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         var saved = await _db.Tasks.Include(t => t.AssignedUser).FirstAsync(t => t.Id == task.Id);
         return MapToDto(saved);

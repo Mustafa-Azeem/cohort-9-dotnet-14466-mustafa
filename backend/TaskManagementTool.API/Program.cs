@@ -159,13 +159,24 @@ using (var scope = app.Services.CreateScope())
                 FullName = "Admin"
             };
 
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            using var transaction = await db.Database.BeginTransactionAsync();
+
             var createResult = await userManager.CreateAsync(adminUser, adminPassword);
             if (!createResult.Succeeded)
+            {
+                await transaction.RollbackAsync();
                 throw new InvalidOperationException($"Failed to create admin user: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+            }
 
             var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
             if (!roleResult.Succeeded)
+            {
+                await transaction.RollbackAsync();
                 throw new InvalidOperationException($"Failed to add admin user to Admin role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+            }
+
+            await transaction.CommitAsync();
         }
     }
 }

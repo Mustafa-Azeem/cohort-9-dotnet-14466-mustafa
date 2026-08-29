@@ -10,11 +10,19 @@ function AuditLog() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!isAdmin) {
+      setLogs([]);
+      setError("");
+      setLoading(false);
+      return;
+    }
+
     loadLogs();
-  }, []);
+  }, [isAdmin]);
 
   const loadLogs = async () => {
     setError("");
+    setLoading(true);
     try {
       const data = await getAuditLogs();
       setLogs(data);
