@@ -152,6 +152,9 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
     {
+        if (request == null)
+            return BadRequest("Request body is required.");
+
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
