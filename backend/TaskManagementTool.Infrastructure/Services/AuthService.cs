@@ -171,6 +171,8 @@ public class AuthService : IAuthService
             FullName = user.FullName,
             Email = user.Email ?? string.Empty,
             Role = role,
+            CreatedAt = user.CreatedAt,
+            Status = "Active",
             ExpiresAt = expiresAt
         };
 

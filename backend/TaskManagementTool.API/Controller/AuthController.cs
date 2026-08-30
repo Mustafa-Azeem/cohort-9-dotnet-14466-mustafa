@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TaskManagementTool.Application.DTOs.Auth;
+using TaskManagementTool.Application.Exceptions;
 using TaskManagementTool.Application.Interfaces;
+using TaskManagementTool.Domain.Entities;
 
 namespace TaskManagementTool.API.Controllers;
 
@@ -13,12 +16,14 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _configuration;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public AuthController(IAuthService authService, IWebHostEnvironment env, IConfiguration configuration)
+    public AuthController(IAuthService authService, IWebHostEnvironment env, IConfiguration configuration, UserManager<ApplicationUser> userManager)
     {
         _authService = authService;
         _env = env;
         _configuration = configuration;
+        _userManager = userManager;
     }
 
     [HttpPost("register")]
@@ -52,19 +57,24 @@ public class AuthController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
-    public IActionResult Me()
+    public async Task<IActionResult> Me()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-        var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
-        var name = User.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
-        var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ApiException("Not authenticated", 401);
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            throw new ApiException("User not found", 404);
 
         return Ok(new UserInfoDto
         {
-            UserId = userId,
-            FullName = name,
-            Email = email,
-            Role = role
+            UserId = user.Id,
+            FullName = user.FullName,
+            Email = user.Email ?? string.Empty,
+            Role = User.FindFirstValue(ClaimTypes.Role) ?? "User",
+            CreatedAt = user.CreatedAt,
+            Status = "Active"
         });
     }
 
@@ -91,7 +101,9 @@ public class AuthController : ControllerBase
             var frontendResetUrl = _configuration["Smtp:FrontendResetUrl"];
             var portValue = _configuration["Smtp:Port"];
             var hasValidPort = int.TryParse(portValue, out var smtpPort) && smtpPort > 0 && smtpPort <= 65535;
-            var hasValidResetUrl = Uri.TryCreate(frontendResetUrl, UriKind.Absolute, out var frontendUri)
+            var hasValidResetUrl = !string.IsNullOrWhiteSpace(frontendResetUrl)
+                && Uri.TryCreate(frontendResetUrl, UriKind.Absolute, out var frontendUri)
+                && frontendUri is not null
                 && frontendUri.Scheme == Uri.UriSchemeHttps;
 
             if (string.IsNullOrWhiteSpace(smtpHost)
@@ -136,6 +148,35 @@ public class AuthController : ControllerBase
         return Ok(new { message = "If that email is registered, a reset link has been sent." });
     }
 
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ApiException("Not authenticated", 401);
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            throw new ApiException("User not found", 404);
+
+        var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
+        if (!isCurrentPasswordValid)
+            throw new ApiException("Current password is incorrect", 400);
+
+        var changeResult = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+        if (!changeResult.Succeeded)
+        {
+            var errors = string.Join(", ", changeResult.Errors.Select(e => e.Description));
+            throw new ApiException(errors, 400);
+        }
+
+        return Ok(new { message = "Password changed successfully." });
+    }
+
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
     {
@@ -165,7 +206,9 @@ public class AuthController : ControllerBase
             UserId = result.UserId,
             FullName = result.FullName,
             Email = result.Email,
-            Role = result.Role
+            Role = result.Role,
+            CreatedAt = result.CreatedAt,
+            Status = result.Status
         };
     }
 }

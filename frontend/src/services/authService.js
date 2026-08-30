@@ -18,3 +18,8 @@ export const getCurrentUser = async () => {
   const res = await api.get("/auth/me");
   return res.data;
 };
+
+export const changePassword = async (currentPassword, newPassword) => {
+  const res = await api.post("/auth/change-password", { currentPassword, newPassword });
+  return res.data;
+};
