@@ -68,10 +68,20 @@ function NewTask() {
     setLoading(true);
 
     try {
+      const payload = {
+        title: form.title.trim(),
+        description: form.description?.trim() ?? "",
+        dueDate: form.dueDate || undefined,
+        priority: form.priority || "Medium",
+        status: form.status || "Pending",
+        category: form.category?.trim() || "",
+        assignedUserId: form.assignedUserId || undefined,
+      };
+
       if (isEditMode) {
-        await updateTask(id, form);
+        await updateTask(id, payload);
       } else {
-        await createTask(form);
+        await createTask(payload);
       }
       navigate("/tasks");
     } catch (err) {
