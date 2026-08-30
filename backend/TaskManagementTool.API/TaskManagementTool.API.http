@@ -1,0 +1,9 @@
+@TaskManagementTool.API_HostAddress = http://localhost:5223
+@jwt_token = <paste-jwt-token-here>
+
+# Authenticate with a valid JWT from /api/auth/login or /api/auth/register before calling this endpoint.
+GET {{TaskManagementTool.API_HostAddress}}/api/tasks
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+###

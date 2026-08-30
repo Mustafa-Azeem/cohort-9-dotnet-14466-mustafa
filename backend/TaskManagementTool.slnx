@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="TaskManagementTool.API/TaskManagementTool.API.csproj" />
+  <Project Path="TaskManagementTool.Application/TaskManagementTool.Application.csproj" />
+  <Project Path="TaskManagementTool.Domain/TaskManagementTool.Domain.csproj" />
+  <Project Path="TaskManagementTool.Infrastructure/TaskManagementTool.Infrastructure.csproj" />
+  <Project Path="TaskManagementTool.Tests/TaskManagementTool.Tests.csproj" />
+</Solution>
