@@ -22,7 +22,7 @@ body {
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  width: 360px;
+  max-width: min(100%, 360px);
 }
 
 .auth-card h2 {
@@ -125,12 +125,14 @@ body {
 /* layout */
 .page-wrapper {
   min-height: 100vh;
+  width: 100%;
 }
 
 .page-content {
   padding: 30px;
-  max-width: 1000px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .page-header-row {
@@ -259,40 +261,60 @@ body {
 
 /* task form */
 .task-form {
-  background: white;
-  padding: 24px;
-  border-radius: 10px;
-  max-width: 500px;
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 12px;
+  max-width: 760px;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5e7eb;
+  box-sizing: border-box;
 }
 
 .task-form label {
-  margin-top: 12px;
   font-size: 13px;
   font-weight: 600;
+  color: #374151;
 }
 
 .task-form input, .task-form select, .task-form textarea {
-  padding: 9px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
-  margin-top: 4px;
+  margin-top: 6px;
+  background: #ffffff;
+  color: #111827;
+}
+
+.task-form input:focus, .task-form select:focus, .task-form textarea:focus {
+  outline: 2px solid rgba(22, 163, 74, 0.2);
+  border-color: #16a34a;
+}
+
+.task-form textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
 .task-form button {
-  margin-top: 20px;
-  padding: 10px;
+  margin-top: 8px;
+  padding: 12px 16px;
   background: #16a34a;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 /* task detail + profile */
-.task-detail-card, .profile-card {
+/* .task-detail-card, .profile-card {
   background: white;
   padding: 24px;
   border-radius: 10px;
@@ -305,6 +327,174 @@ body {
 
 .task-detail-actions {
   margin-top: 16px;
+} */
+ .task-detail-card {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  max-width: 500px;
+}
+.task-detail-card p {
+  margin: 8px 0;
+}
+.task-detail-actions {
+  margin-top: 16px;
+}
+ .profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.profile-subtitle {
+  color: #475569;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.profile-card {
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 30px 24px 20px 24px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* 3D Sphere Green Avatar */
+.profile-avatar-large {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #4ade80, #16a34a, #064e3b);
+  box-shadow: inset -2px -2px 6px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(22, 163, 74, 0.3);
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.profile-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+}
+
+.profile-role {
+  font-size: 0.95rem;
+  color: #334155;
+  margin: 0 0 2px 0;
+  font-weight: 500;
+}
+
+.profile-email {
+  font-size: 0.88rem;
+  color: #334155;
+  margin: 0 0 4px 0;
+}
+
+.profile-member-since {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-bottom: 22px;
+}
+
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 1.5px solid #94a3b8;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.column-details p {
+  margin: 4px 0 !important;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.btn-edit-profile {
+  flex: 1;
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-edit-profile:hover {
+  background-color: #15803d;
+}
+
+.btn-change-password {
+  flex: 1;
+  background-color: #d1d5db;
+  color: #374151;
+  border: 1px solid #9ca3af;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-change-password:hover {
+  background-color: #9ca3af;
+}
+
+.manage-settings-link {
+  color: #1e293b;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* ==== Sidebar Layout (new design) ==== */
@@ -312,6 +502,7 @@ body {
 .app-layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
 }
 
 .sidebar {
@@ -415,8 +606,19 @@ body {
 
 .main-content {
   flex: 1;
-  padding: 30px 40px;
-  max-width: 1100px;
+  width: 100%;
+  min-width: 0;
+  padding: 24px 32px;
+}
+
+.main-content h1 {
+  color: #1f2937;
+}
+
+@media (prefers-color-scheme: dark) {
+  .main-content h1 {
+    color: #f3f4f6;
+  }
 }
 
 .stat-icon {
@@ -471,45 +673,17 @@ body {
     flex-direction: column;
   }
 }
-/* ==== Profile avatar ==== */
+/* ==== Success message box ==== */
 
-.profile-card {
-  background: white;
-  padding: 32px;
-  border-radius: 12px;
-  max-width: 380px;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-}
-
-.profile-avatar-large {
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #16a34a, #15803d);
-  color: white;
-  font-size: 30px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-}
-
-.profile-name {
-  margin: 0 0 4px;
-  font-size: 20px;
-}
-
-.profile-email {
-  color: #6b7280;
-  margin: 0 0 12px;
-  font-size: 14px;
-}
-
-.profile-role-badge {
-  display: inline-block;
+.success-box {
   background: #dcfce7;
   color: #166534;
-  margin-bottom: 20px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 10px;
 }
+
+.status-created { background: #dcfce7; color: #166534; }
+.status-updated { background: #dbeafe; color: #1d4ed8; }
+.status-deleted { background: #fee2e2; color: #b91c1c; }
