@@ -9,6 +9,7 @@ import TaskList from "./pages/TaskList";
 import TaskDetail from "./pages/TaskDetail";
 import NewTask from "./pages/NewTask";
 import Profile from "./pages/Profile";
+import UserManagement from "./pages/UserManagement";
 
 import "./App.css";
 
@@ -27,6 +28,7 @@ function App() {
           <Route path="/tasks/:id" element={<ProtectedRoute><TaskDetail /></ProtectedRoute>} />
           <Route path="/tasks/:id/edit" element={<ProtectedRoute><NewTask /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

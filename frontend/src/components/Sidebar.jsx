@@ -27,6 +27,11 @@ function Sidebar() {
         <Link to="/tasks" className={isActive("/tasks") ? "active" : ""}>
           Tasks
         </Link>
+        {isAdmin && (
+          <Link to="/users" className={isActive("/users") ? "active" : ""}>
+            Manage Users
+          </Link>
+        )}
         <Link to="/profile" className={isActive("/profile") ? "active" : ""}>
           Profile
         </Link>

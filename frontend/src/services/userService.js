@@ -7,3 +7,8 @@ export const getAllUsers = async () => {
   }
   return res.data;
 };
+
+export const promoteToAdmin = async (userId) => {
+  // POST to /users/{id}/promote -- follows existing api instance (cookies/interceptors)
+  await api.post(`/users/${userId}/promote`);
+};
