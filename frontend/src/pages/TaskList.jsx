@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { Pencil, Trash2 } from "lucide-react";
 import { getTasks, deleteTask } from "../services/taskService";
 import Sidebar from "../components/Sidebar";
 
@@ -90,20 +91,52 @@ function TaskList() {
         ) : tasks.length === 0 ? (
           <p>No tasks found.</p>
         ) : (
-          <div className="task-list">
-            {tasks.map((task) => (
-              <div key={task.id} className="task-row">
-                <Link to={`/tasks/${task.id}`} className="task-row-title">
-                  {task.title}
-                </Link>
-                <span className={`badge priority-${task.priority.toLowerCase()}`}>{task.priority}</span>
-                <span className={`badge status-${task.status.toLowerCase()}`}>{task.status}</span>
-                <span className="task-assigned">{task.assignedUserName}</span>
-                <button className="btn-danger-small" onClick={() => handleDelete(task.id)}>
-                  Delete
-                </button>
-              </div>
-            ))}
+          <div className="task-table-wrapper">
+            <table className="task-table">
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                  <th>Assigned To</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {tasks.map((task) => (
+                  <tr key={task.id}>
+                    <td className="task-name-cell">
+                      <Link to={`/tasks/${task.id}`} className="task-name-link">
+                        {task.title}
+                      </Link>
+                    </td>
+                    <td className="status-cell">
+                      <span className={`badge status-${task.status.toLowerCase()}`}>
+                        {task.status}
+                      </span>
+                    </td>
+                    <td className="priority-cell">
+                      <span className={`badge priority-${task.priority.toLowerCase()}`}>
+                        {task.priority}
+                      </span>
+                    </td>
+                    <td className="assigned-cell">
+                      {task.assignedUserName}
+                    </td>
+                    <td className="actions-cell">
+                      <div className="actions-flex">
+                        <Link to={`/tasks/${task.id}/edit`} className="action-btn edit-btn" aria-label="Edit task">
+                          <Pencil size={18} />
+                        </Link>
+                        <button className="action-btn delete-btn" onClick={() => handleDelete(task.id)} aria-label="Delete task">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </main>
