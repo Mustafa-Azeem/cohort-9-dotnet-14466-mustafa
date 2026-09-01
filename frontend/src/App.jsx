@@ -10,6 +10,7 @@ import TaskDetail from "./pages/TaskDetail";
 import NewTask from "./pages/NewTask";
 import Profile from "./pages/Profile";
 import UserManagement from "./pages/UserManagement";
+import Calendar from "./pages/Calendar";
 
 import "./App.css";
 
@@ -29,6 +30,7 @@ function App() {
           <Route path="/tasks/:id/edit" element={<ProtectedRoute><NewTask /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
