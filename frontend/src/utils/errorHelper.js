@@ -2,7 +2,7 @@
 // 1. custom ApiException -> { error: "message" }
 // 2. ModelState validation failure -> { errors: { FieldName: ["msg1", "msg2"] } }
 export const getErrorMessage = (err, fallback) => {
-  const data = err.response?.data;
+  const data = err?.response?.data;
   if (!data) return fallback;
 
   if (data.error) return data.error;
