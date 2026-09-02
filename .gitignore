@@ -17,3 +17,4 @@ Logs/
 # OS files
 .DS_Store
 Thumbs.db
+backend/TaskManagementTool.API/appsettings.Production.json 

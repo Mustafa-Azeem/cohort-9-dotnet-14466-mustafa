@@ -30,6 +30,11 @@ function Sidebar() {
         <Link to="/profile" className={isActive("/profile") ? "active" : ""}>
           Profile
         </Link>
+        {isAdmin && (
+          <Link to="/activity" className={isActive("/activity") ? "active" : ""}>
+            Activity Log
+          </Link>
+        )}
       </nav>
 
       <div className="sidebar-footer">

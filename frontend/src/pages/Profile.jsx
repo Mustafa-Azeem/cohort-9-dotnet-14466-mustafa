@@ -21,7 +21,7 @@ function Profile() {
   const profileRole = user?.role?.trim() || "Role unavailable";
   const profileEmail = user?.email?.trim() || "Email unavailable";
   const joinedDate = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A";
-  const status = user?.status || "Active";
+  const status = user?.status || "Status unavailable";
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
