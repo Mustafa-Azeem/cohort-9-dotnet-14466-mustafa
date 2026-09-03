@@ -12,6 +12,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<TaskItem> Tasks { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<CalendarEvent> CalendarEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

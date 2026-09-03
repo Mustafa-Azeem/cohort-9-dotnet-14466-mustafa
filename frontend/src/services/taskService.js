@@ -6,9 +6,11 @@ export const getTasks = async (filters = {}) => {
 };
 
 export const getTaskById = async (id) => {
+  if (id == null) throw new Error("Task id is required");
   const res = await api.get(`/tasks/${id}`);
   return res.data;
 };
+
 
 export const createTask = async (taskData) => {
   const res = await api.post("/tasks", taskData);
@@ -16,11 +18,13 @@ export const createTask = async (taskData) => {
 };
 
 export const updateTask = async (id, taskData) => {
+  if (id == null) throw new Error("Task id is required");
   const res = await api.put(`/tasks/${id}`, taskData);
   return res.data;
 };
 
 export const deleteTask = async (id) => {
+  if (id == null) throw new Error("Task id is required");
   const res = await api.delete(`/tasks/${id}`);
   return res.data;
 };

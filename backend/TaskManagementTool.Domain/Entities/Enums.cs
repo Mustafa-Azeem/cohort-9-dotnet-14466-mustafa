@@ -15,3 +15,11 @@ public enum JobStatus
     InProgress = 1,
     Completed = 2
 }
+
+public enum EventType
+{
+    Meeting = 0,
+    Deadline = 1,
+    Conference = 2,
+    Other = 3
+}

@@ -98,6 +98,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<ICalendarService, CalendarService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
