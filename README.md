@@ -130,3 +130,10 @@ Development was organized into module-based feature branches (`feature/auth`, `f
 - Password reset returns the token directly to the client only in the Development environment; a real deployment would wire this to an actual email provider (SMTP config is already structured for this — see `Smtp` section in configuration).
 - Calendar reminders are client-side and only fire while the Calendar page is open in a browser tab — there's no background/server-side push notification system, which was out of scope for this project.
 - FluentValidation is installed but validation is currently handled via DataAnnotations and `IValidatableObject` — either works for the current scope.
+
+## For Admin Access
+
+"AdminSeed": {
+  "Email": "admin@taskmanager.com",
+  "Password": "Admin1234"
+}
